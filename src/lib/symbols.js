@@ -27,6 +27,7 @@ export default {
   watchers: Symbol('watchers'),
   watchKeys: Symbol('watchKeys'),
   wrapper: Symbol('wrapper'),
+  executeListeners: Symbol('executeListeners'),
 
   /* Utilizing the global Symbol registry for the following purposes */
 

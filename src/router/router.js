@@ -143,6 +143,11 @@ export const navigate = async function () {
         route.transition = route.transition(previousRoute, route)
       }
 
+      // to ensure that the current route component does not listen for events from the target route components
+      if (previousRoute) {
+        this.activeView.setListenersExecution(false)
+      }
+
       let holder
       let { view, focus } = cacheMap.get(route) || {}
 
@@ -168,6 +173,8 @@ export const navigate = async function () {
         }
       } else {
         holder = view[symbols.holder]
+        // restore listeners execution on view loaded from cache
+        view.setListenersExecution(true)
       }
 
       this[symbols.children].push(view)

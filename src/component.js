@@ -164,6 +164,9 @@ const Component = (name = required('name'), config = required('config')) => {
       })
     }
 
+    // setup execute-listeners property on a component
+    this[symbols.executeListeners] = true
+
     // set all symbol based properties to non-enumerable and non-configurable
     Object.getOwnPropertySymbols(this).forEach((property) => {
       Object.defineProperties(this, {

@@ -15,6 +15,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import symbols from '../../lib/symbols.js'
 import eventListeners from '../../lib/eventListeners'
 
 export default {
@@ -34,4 +35,32 @@ export default {
     enumerable: true,
     configurable: false,
   },
+  setListenersExecution: {
+    value: function (v) {
+      this[symbols.executeListeners] = v
+      setListenersExecutionOnChildren(this[symbols.children], v)
+    },
+    writable: false,
+    enumerable: true,
+    configurable: false,
+  },
+}
+
+const setListenersExecutionOnChildren = function (children, v) {
+  for (let i = 0; i < children.length; i++) {
+    if (!children[i]) return
+
+    // call setListenersExecution when method is available on child
+    if (
+      children[i].setListenersExecution &&
+      typeof children[i].setListenersExecution === 'function'
+    ) {
+      children[i].setListenersExecution(v)
+    }
+
+    // recursively call setListenersExecution when it's an object of items (happens when using a forloop construct)
+    else if (Object.getPrototypeOf(children[i]) === Object.prototype) {
+      setListenersExecutionOnChildren(Object.values(children[i]), v)
+    }
+  }
 }

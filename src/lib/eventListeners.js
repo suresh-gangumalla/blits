@@ -15,6 +15,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import symbols from './symbols'
+
 const eventsMap = new Map()
 
 export default {
@@ -25,30 +27,33 @@ export default {
       eventsMap.set(event, componentsMap)
     }
 
-    let components = componentsMap.get(component)
-    if (!components) {
-      components = new Set()
-      componentsMap.set(component, components)
+    let callbacks = componentsMap.get(component)
+    if (!callbacks) {
+      callbacks = new Set()
+      componentsMap.set(component, callbacks)
     }
 
-    components.add(cb)
+    callbacks.add(cb)
   },
   executeListeners(event, params) {
     const componentsMap = eventsMap.get(event)
     if (componentsMap) {
-      componentsMap.forEach((component) => {
-        component.forEach((cb) => {
-          cb(params)
-        })
+      componentsMap.forEach((callbacks, component) => {
+        if (component[symbols.executeListeners]) {
+          callbacks.forEach((cb) => {
+            cb(params)
+          })
+        }
       })
     }
   },
   removeListeners(component) {
     eventsMap.forEach((componentMap) => {
-      const cmp = componentMap.get(component)
-      if (cmp) {
-        cmp.clear()
-        componentMap.delete(cmp)
+      const callbacks = componentMap.get(component)
+      if (callbacks) {
+        callbacks.clear()
+        // deleting component key for current event component map
+        componentMap.delete(component)
       }
     })
   },
