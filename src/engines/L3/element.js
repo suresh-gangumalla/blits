@@ -328,9 +328,9 @@ const Element = {
     // check if a transition is already scheduled or running on the same prop
     if (this.scheduledTransitions[prop]) {
       if (this.scheduledTransitions[prop].f.state === 'running') {
-        this.scheduledTransitions[prop].f.stop()
         // fastforward to final value
         this.node[prop] = this.scheduledTransitions[prop].v
+        // this.scheduledTransitions[prop].f.stop()
       }
     }
 
@@ -376,24 +376,13 @@ const Element = {
     // start animation
     const animation = f.start()
 
-    // wait until the animation ends
-    await animation.waitUntilStopped()
-
-    // removed the prop from scheduled transitions
-    delete this.scheduledTransitions[prop]
-
-    // fire transition end callback if specified
-    transition.end &&
-      typeof transition.end === 'function' &&
-      transition.end.call(this.component, this, prop, this.node[prop])
+    // start animation
+    f.start()
 
     return Promise.resolve()
   },
   destroy() {
     Log.debug('Deleting  Node', this.nodeId)
-    Object.values(this.scheduledTransitions).forEach((scheduledTransition) => {
-      clearTimeout(scheduledTransition.timeout)
-    })
     this.node.destroy()
   },
   get nodeId() {
