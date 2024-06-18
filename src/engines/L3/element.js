@@ -365,16 +365,21 @@ const Element = {
       f,
     }
 
-    // listen to animating event when animation really starts (depending on specified delay)
-    f.once('animating', () => {
-      // fire transition start callback if specified
-      transition.start &&
-        typeof transition.start === 'function' &&
+    if (transition.start && typeof transition.start === 'function') {
+      // fire transition start callback when animation really starts (depending on specified delay)
+      f.once('animating', () => {
         transition.start.call(this.component, this, prop, startValue)
-    })
+      })
+    }
 
-    // start animation
-    const animation = f.start()
+    f.once('stopped', () => {
+      // remove the prop from scheduled transitions
+      this.scheduledTransitions[prop] = null
+      // fire transition end callback when animation ends (if specified)
+      if (transition.end && typeof transition.end === 'function') {
+        transition.end.call(this.component, this, prop, this.node[prop])
+      }
+    })
 
     // start animation
     f.start()
