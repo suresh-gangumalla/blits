@@ -298,7 +298,7 @@ const generateForLoopCode = function (templateObject, parent) {
   const indexToInjectDestroyCode = ctx.renderCode.length
 
   ctx.renderCode.push(`
-      created.length = 0
+      // created.length = 0
       const length = collection.length
       for(let __index = 0; __index < length; __index++) {
         const scope = Object.create(component)
@@ -306,6 +306,10 @@ const generateForLoopCode = function (templateObject, parent) {
         scope['${index}'] = __index
         scope['${item}'] = rawCollection[__index]
         scope['key'] = ${forKey || '__index'}
+
+        if(created.indexOf(scope['key']) > -1) {
+          continue;
+        }
   `)
   if ('ref' in templateObject && templateObject.ref.indexOf('$') === -1) {
     // automatically map the ref for each item in the loop based on the given ref key
