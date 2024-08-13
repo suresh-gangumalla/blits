@@ -367,11 +367,17 @@ const generateForLoopCode = function (templateObject, parent) {
   // inner scope variables are part of the main forloop
   innerScopeEffects.forEach((effect) => {
     const key = effect.indexOf(`scope.${index}`) > -1 ? `'${interpolate(result[2], '')}'` : null
-    ctx.renderCode.push(`
-      effect(() => {
-        ${effect}
-      }, ${key})
+    if (effect.indexOf("Symbol.for('props')") === -1) {
+      ctx.renderCode.push(`
+        effect(() => {
+          ${effect}
+        }, ${key})
+      `)
+    } else {
+      ctx.renderCode.push(`
+      ${effect}
     `)
+    }
   })
   // if(elms[${forStartCounter}][0] && elms[${forStartCounter}][0].forComponent && elms[${forStartCounter}][0].forComponent.___layout) {
   //   elms[${forStartCounter}][0].forComponent.___layout()
