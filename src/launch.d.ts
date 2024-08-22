@@ -124,7 +124,7 @@ export interface Settings {
    *
    * The default font must be registered in the `fonts` array in the settings.
    *
-   * Defaults to `lato` font family
+   * Defaults to `sans-serif` font family, which is the default of the Lightning Renderer
    */
   defaultFont?: string,
   /**
@@ -243,7 +243,18 @@ export interface Settings {
    *
    * Defaults to `webgl`
    */
-  renderMode?: RenderModes
+  renderMode?: RenderModes,
+
+  /**
+   * The time, in milliseconds, after which Blits considers a key press a _hold_ key press
+   *
+   * During a hold key press the focus delegation behaviour is different: when scrolling
+   * through a long list, focus is not handed over to each individual list item, creating a
+   * smoother experience
+   *
+   * Defaults to `50` (ms)
+   */
+  holdTimeout?: number
 }
 
 /**

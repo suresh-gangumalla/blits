@@ -17,13 +17,13 @@
 
 import parser from '../templateparser/parser.js'
 import generator from '../codegenerator/generator.js'
-import path from 'path'
 
 export default (source, filePath) => {
   if (
     source.indexOf('Blits.Component(') > -1 ||
     source.indexOf('Blits.Application(') > -1 ||
-    /=>\s*Component\(['"][A-Za-z]+['"],/s.test(source) // blits component
+    /=>\s*Component\(['"][A-Za-z]+['"],/s.test(source) || // blits component
+    /\{.*?template\s*:\s*(['"`])((?:\\?.)*?)\1.*?\}/s.test(source) // object with template key
   ) {
     const templates = source.matchAll(/(?<!\/\/\s*)template\s*:\s*(['"`])((?:\\?.)*?)\1/gs)
     let newSource = source
@@ -45,8 +45,7 @@ export default (source, filePath) => {
           resourceName = source.match(/Blits\.Component\(['"](.*)['"]\s*,/)[1]
         }
 
-        const componentPath = path.relative(process.cwd(), filePath)
-        const parsed = parser(templateContent, resourceName, null, componentPath)
+        const parsed = parser(templateContent, resourceName, null, filePath)
 
         // Generate the code
         const code = generator.call({ components: {} }, parsed)

@@ -1,5 +1,47 @@
 # Changelog
 
+## v1.3.0
+
+_19 aug 2024_
+
+- Fixed bug in for-loop when key is not a string but a number
+- Added `$shallow`-modifier to for-loop
+- Added several performance optimizations
+- Added support for dynamic arguments in object notation (i.e. `mount="{x: $x, y: $y}"`)
+
+## v1.2.0
+
+_5 aug 2024_
+
+- Added plugin system for Blits
+- Added Language plugin, modeled after L2-SDK Language plugin
+- Removed unused built-in Image component
+- Marked `this.trigger()`-method as deprecated in definition file
+- Removed double assignment of `this.node` during element creation
+
+## v1.1.0
+
+_25 july 2024_
+
+- Made `holdTimeout` configurable and added to launch settings
+- Improved test coverage
+- Removed imporChunkUrl dependency as it’s no longer needed
+- Abstracted path from pre-compiler, to make it more reusable (in playground for example)
+- Added `defaultFont` launch setting to boilerplate example
+
+## v1.0.0
+
+_15 july 2024_
+
+- Added multiple optimizations that improve the performance
+- Fixed mountY prop setting
+- Added functionality for providing custom shaders
+- Added initial support for accessing children
+- Added first version of Layout component
+- Improved test coverage
+- Refactored transitions and fixed promise resolve issues
+- Upgraded to renderer v1.0.0
+
 ## v0.10.0
 
 _17 june 2024_

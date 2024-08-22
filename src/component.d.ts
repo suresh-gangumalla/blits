@@ -91,6 +91,7 @@ declare namespace Component {
   }
   type PropsArray<T extends string> = T[]
   type AdvancedProps = AdvancedProp[]
+  type MixedProps<T extends string> = (T | AdvancedProp)[];
 
   // type ExtractPropNames<T extends Prop[]> = T extends (infer U)[]
   // ? U extends string
@@ -327,6 +328,12 @@ declare namespace Component {
      * Triggers a forced update on state variables.
      */
     $trigger: (key: string) => void
+    /**
+     * @deprecated
+     *
+     * Triggers a forced update on state variables.
+     * Deprecated: use `this.$trigger()` instead
+     */
     trigger: (key: string) => void
 
     /**
@@ -394,7 +401,7 @@ declare namespace Component {
      * }]
      * ```
      */
-    props?: PropsArray<Props> | AdvancedProp[],
+    props?: PropsArray<Props> | AdvancedProps | MixedProps<Props>
     /**
      * Computed properties
      */

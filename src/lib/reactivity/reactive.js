@@ -22,15 +22,17 @@ const arrayPatchMethods = ['push', 'pop', 'shift', 'unshift', 'splice', 'sort']
 
 const proxyMap = new WeakMap()
 
-const getRaw = (value) => {
+export const getRaw = (value) => {
   const raw = value && value[symbols.raw]
   return raw ? getRaw(raw) : value
 }
 
 const reactiveProxy = (original, _parent = null, _key) => {
-  // don't create a proxy when a Blits component is assigned to a state variable
-  if (typeof original === 'object' && original[symbols.id]) {
-    return original
+  // don't create a proxy when a Blits component or an Image Texture
+  // is assigned to a state variable
+  if (typeof original === 'object') {
+    if (original[symbols.id] !== undefined) return original
+    if (original.constructor.name === '_ImageTexture') return original
   }
 
   // if original object is already a proxy, don't create a new one but return the existing one instead
@@ -53,7 +55,7 @@ const reactiveProxy = (original, _parent = null, _key) => {
             track(target, key)
           }
           // create a new reactive proxy
-          return reactiveProxy(target[key], target, key)
+          return reactiveProxy(getRaw(target[key]), target, key)
         }
         // augment array path methods (that change the length of the array)
         if (arrayPatchMethods.indexOf(key) !== -1) {
@@ -81,7 +83,7 @@ const reactiveProxy = (original, _parent = null, _key) => {
           track(target, key)
         }
         // create a new reactive proxy
-        return reactiveProxy(target[key], target, key)
+        return reactiveProxy(getRaw(target[key]), target, key)
       }
 
       // handling all other types

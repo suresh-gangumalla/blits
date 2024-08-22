@@ -35,6 +35,7 @@ export default function (templateObject = { children: [] }) {
       'context',
       'components',
       'effect',
+      'getRaw',
       ctx.renderCode.join('\n')
     ),
     effects: ctx.effectsCode.map(
@@ -69,7 +70,7 @@ const generateElementCode = function (
   renderCode.push(`const elementConfig${counter} = {}`)
 
   if (options.forloop) {
-    renderCode.push(`if(!${elm}) {`)
+    renderCode.push(`if(${elm} === undefined) {`)
   }
 
   renderCode.push(`
@@ -90,7 +91,6 @@ const generateElementCode = function (
   Object.keys(templateObject).forEach((key) => {
     if (key === 'slot') {
       renderCode.push(`
-        console.log(component, component[Symbol.for('slots')])
         elementConfig${counter}['parent'] = component[Symbol.for('slots')].filter(slot => slot.ref === '${templateObject.slot}').shift() || component[Symbol.for('slots')][0] || parent
       `)
     }
@@ -99,9 +99,20 @@ const generateElementCode = function (
 
     if (isReactiveKey(key)) {
       if (options.holder && key === ':color') return
-      this.effectsCode.push(
-        `${elm}.set('${key.substring(1)}', ${interpolate(templateObject[key], options.component)})`
-      )
+      if (options.holder) {
+        this.effectsCode.push(`
+        if(typeof skip${counter} === 'undefined' ||
+          skip${counter}.indexOf('${key.substring(1)}') === -1)
+          ${elm}.set('${key.substring(1)}', ${interpolate(templateObject[key], options.component)})
+        `)
+      } else {
+        this.effectsCode.push(`
+            ${elm}.set('${key.substring(1)}', ${interpolate(
+          templateObject[key],
+          options.component
+        )})
+          `)
+      }
       renderCode.push(
         `elementConfig${counter}['${key.substring(1)}'] = ${interpolate(
           templateObject[key],
@@ -117,16 +128,18 @@ const generateElementCode = function (
 
   if (options.holder === true) {
     renderCode.push(`
+    const skip${counter} = []
     if(typeof cmp${counter} !== 'undefined') {
       for(let key in cmp${counter}.config.props) {
         delete elementConfig${counter}[cmp${counter}.config.props[key]]
+        skip${counter}.push(cmp${counter}.config.props[key])
       }
     }
     `)
   }
 
   if (options.forloop) {
-    renderCode.push(`if(!${elm}.nodeId) {`)
+    renderCode.push(`if(${elm}.nodeId === undefined) {`)
   }
 
   renderCode.push(`${elm}.populate(elementConfig${counter})`)
@@ -187,6 +200,11 @@ const generateComponentCode = function (
   }
 
   renderCode.push(`const props${counter} = {}`)
+
+  if (options.forloop) {
+    renderCode.push(`if(${elm} === undefined) {`)
+  }
+
   Object.keys(templateObject).forEach((key) => {
     if (isReactiveKey(key)) {
       this.effectsCode.push(`
@@ -206,10 +224,6 @@ const generateComponentCode = function (
       )
     }
   })
-
-  if (options.forloop) {
-    renderCode.push(`if(!${elm}) {`)
-  }
 
   renderCode.push(`
     componentType = props${counter}['is'] || '${templateObject[Symbol.for('componentType')]}'
@@ -253,6 +267,15 @@ const generateForLoopCode = function (templateObject, parent) {
   const forLoop = templateObject[':for']
   delete templateObject[':for']
 
+  const key = templateObject['key']
+  const forKey = interpolate(key, 'scope.')
+
+  const shallow = !!!(
+    templateObject['$shallow'] && templateObject['$shallow'].toLowerCase() === 'false'
+  )
+  delete templateObject['$shallow']
+
+  delete templateObject['key']
   const regex = /(.+)\s+in\s+(.+)/gi
   //   const regex = /(:?\(*)(.+)\s+in\s+(.+)/gi
 
@@ -263,6 +286,8 @@ const generateForLoopCode = function (templateObject, parent) {
     .replace('(', '')
     .replace(')', '')
     .split(/\s*,\s*/)
+
+  const scopeRegex = new RegExp(`(scope\\.(?!${item}\\.|${index}|key)(\\w+))`, 'gi')
 
   // local context
   const ctx = {
@@ -276,37 +301,33 @@ const generateForLoopCode = function (templateObject, parent) {
   }
 
   const forStartCounter = counter
-  const forEndCounter = counter + (templateObject.children || []).length
 
   ctx.renderCode.push(`
     const created${forStartCounter} = []
     const forloop${forStartCounter} = (collection = [], elms, created) => {
-      const keys = new Set(collection.map((${item}) => ${interpolate(templateObject.key, '')}))
-      let i = created.length
-
-      while (i--) {
-        const key = created[i]
-        if (!keys.has(key)) {
-  `)
-  for (let i = forStartCounter; i <= forEndCounter; i++) {
-    ctx.renderCode.push(`
-          elms[${i}][key] && elms[${i}][key].destroy()
-          delete elms[${i}][key]
-    `)
-  }
-  ctx.renderCode.push(`
-        }
+      const rawCollection = getRaw(collection)
+      const keys = new Set()
+      let l = rawCollection.length
+      while(l--) {
+        const ${item} = rawCollection[l]
+        keys.add('' +  ${interpolate(key, '') || 'l'})
       }
+  `)
 
+  // keep track of the index in the render code so we can inject
+  // the code that takes care of destroying elements (generated later on)
+  // in the right spot
+  const indexToInjectDestroyCode = ctx.renderCode.length
+
+  ctx.renderCode.push(`
       created.length = 0
-      const length = collection.length
-
+      const length = rawCollection.length
       for(let __index = 0; __index < length; __index++) {
-        parent = ${parent}
         const scope = Object.create(component)
-        scope['key'] = __index
+        parent = ${parent}
         scope['${index}'] = __index
-        scope['${item}'] = collection[__index]
+        scope['${item}'] = rawCollection[__index]
+        scope['key'] = '' + ${forKey || '__index'}
   `)
   if ('ref' in templateObject && templateObject.ref.indexOf('$') === -1) {
     // automatically map the ref for each item in the loop based on the given ref key
@@ -316,11 +337,6 @@ const generateForLoopCode = function (templateObject, parent) {
     templateObject.ref = '$__ref'
   }
 
-  if ('key' in templateObject) {
-    ctx.renderCode.push(`
-        scope.key = '' + ${interpolate(templateObject.key, 'scope.')}
-    `)
-  }
   ctx.renderCode.push(`
         created.push(scope.key)
   `)
@@ -345,49 +361,105 @@ const generateForLoopCode = function (templateObject, parent) {
     })
   }
 
-  // any dynamic attribute referencing index, should run
-  // as part of the forloop function
-  ctx.effectsCode.forEach((effect) => {
-    if (effect.indexOf(`scope.${index}`) !== -1) {
+  // separate effects that only rely on variables in the itteration
+  const innerScopeEffects = ctx.effectsCode.filter(
+    (effect) => [...effect.matchAll(scopeRegex)].length === 0
+  )
+
+  // separate effects that (also) rely on variables in the outer scope
+  const outerScopeEffects = ctx.effectsCode.filter(
+    (effect) => [...effect.matchAll(scopeRegex)].length !== 0
+  )
+
+  if (shallow === false) {
+    ctx.renderCode.push(`
+      scope['${item}'] = null
+      scope['${item}'] = collection[__index]
+  `)
+  }
+
+  // inner scope variables are part of the main forloop
+  innerScopeEffects.forEach((effect) => {
+    const key = effect.indexOf(`scope.${index}`) > -1 ? `'${interpolate(result[2], '')}'` : null
+    if (effect.indexOf("Symbol.for('props')") === -1) {
+      ctx.renderCode.push(`
+        effect(() => {
+          ${effect}
+        }, ${key})
+      `)
+    } else {
+      // props shouldn't be wrapped in an effect, but simply passed on
       ctx.renderCode.push(`
         ${effect}
       `)
     }
   })
-
+  // if(elms[${forStartCounter}][0] && elms[${forStartCounter}][0].forComponent && elms[${forStartCounter}][0].forComponent.___layout) {
+  //   elms[${forStartCounter}][0].forComponent.___layout()
+  // }
   ctx.renderCode.push(`
-    if(!elms[${counter}][scope.key].___hasEffect) {
-  `)
-  ctx.effectsCode.forEach((effect) => {
-    if (
-      // no reference to index
-      effect.indexOf(`scope.${index}`) === -1 ||
-      // reference to index, but _also_ another dynamic scope variable
-      (effect.indexOf(`scope.${index}`) !== -1 && effect.match(/scope\./g).length > 1)
-    ) {
-      ctx.renderCode.push(`
-          effect(() => {
-            ${effect}
-          })
-      `)
     }
-  })
-
-  ctx.renderCode.push(`
-    elms[${counter}][scope.key].___hasEffect = true
   }`)
 
-  ctx.renderCode.push(`
-      if(elms[${forStartCounter}][0] && elms[${forStartCounter}][0].forComponent && elms[${forStartCounter}][0].forComponent.___layout) {
-        elms[${forStartCounter}][0].forComponent.___layout()
-      }
-    }
-  }
+  // generate code that destroys items
+  const destroyCode = []
+  destroyCode.push(`
+      let i = created.length
 
-  effect(() => {
-    forloop${forStartCounter}(${cast(result[2], ':for')}, elms, created${forStartCounter})
-  }, '${interpolate(result[2], '')}')
-`)
+      while (i--) {
+        if (keys.has(created[i]) === false) {
+          const key = created[i]
+  `)
+  const forEndCounter = counter
+
+  for (let i = forStartCounter; i <= forEndCounter; i++) {
+    destroyCode.push(`
+          elms[${i}][key] && elms[${i}][key].destroy()
+          delete elms[${i}][key]
+      `)
+  }
+  destroyCode.push(`
+       }
+    }
+  `)
+
+  // inject the destroy code in the correct spot
+  ctx.renderCode.splice(indexToInjectDestroyCode, 0, ...destroyCode)
+  ctx.renderCode.push(`
+    effect(() => {
+      forloop${forStartCounter}(${cast(result[2], ':for')}, elms, created${forStartCounter})
+    }, '${interpolate(result[2], '')}')
+  `)
+
+  outerScopeEffects.forEach((effect) => {
+    const matches = [...effect.matchAll(scopeRegex)]
+
+    let l = matches.length
+    const refs = []
+    while (l--) {
+      const match = matches[l]
+      const ref = `component.${match[2]}`
+      refs.indexOf(ref) === -1 && refs.push(ref)
+      effect =
+        effect.substring(0, match.index) + ref + effect.substring(match.index + match[1].length)
+    }
+
+    ctx.renderCode.push(`
+      effect(() => {
+        void ${refs.join(', ')}
+        for(let __index = 0; __index < ${interpolate(result[2])}.length; __index++) {
+          const scope = {}
+          scope['${index}'] = __index
+          scope['${item}'] = ${interpolate(result[2])}[__index]
+          scope['key'] = ${forKey || '__index'}
+    `)
+
+    ctx.renderCode.push(`
+          ${effect}
+        }
+      })
+    `)
+  })
 
   this.renderCode.push(ctx.renderCode.join('\n'))
 }
@@ -419,7 +491,7 @@ const generateCode = function (templateObject, parent = false, options = {}) {
 const interpolate = (val, component = 'component.') => {
   if (val === undefined) return val
   const replaceString = /('.*?')+/gi
-  const replaceDollar = /\$/gi
+  const replaceDollar = /\$(\$(?=\$)|\$?)/g
   const matches = val.matchAll(replaceString)
   const restore = []
 
@@ -432,10 +504,19 @@ const interpolate = (val, component = 'component.') => {
     i++
   }
 
-  // replace remaining dollar signs
-  val = val.replace(replaceDollar, component || '')
+  // replace dollar signs using the regex and function
+  val = val.replace(replaceDollar, (match, group1) => {
+    // single dollar sign
+    if (group1 === '') {
+      return component
+    }
+    // consecutive dollar sign, replace only the first $
+    else if (group1 === '$') {
+      return component + '$'
+    }
+  })
 
-  // restore string replacemenet
+  // restore string replacement
   restore.forEach((el, idx) => {
     val = val.replace(`[@@REPLACEMENT${idx}@@]`, el)
   })
@@ -444,6 +525,7 @@ const interpolate = (val, component = 'component.') => {
 }
 
 const cast = (val = '', key = false, component = 'component.') => {
+  const dynamicArgumentRegex = /\$\w+/gi
   let castedValue
 
   // inline content
@@ -494,6 +576,21 @@ const cast = (val = '', key = false, component = 'component.') => {
   else if (val.startsWith('$')) {
     castedValue = `${component}${val.replace('$', '')}`
   }
+  // dynamic value in object
+  else if (dynamicArgumentRegex.exec(val)) {
+    const rex = /\w+\s*:\s*(?:[^\s,}]+|".*?"|'.*?')/g
+    const results = val.match(rex)
+    castedValue = {}
+    if (results) {
+      for (let i = 0; i < results.length; i++) {
+        const members = results[i].split(/\s*:\s*/)
+        if (members) {
+          populateFields(members[0], members[1], component, castedValue)
+        }
+      }
+    }
+    return interpolateObject(castedValue)
+  }
   // static string
   else {
     castedValue = `"${val}"`
@@ -514,4 +611,22 @@ const parseInlineContent = (val, component) => {
     }
   }
   return val
+}
+
+// Populate value into target's prop
+const populateFields = (prop, val, component, target) => {
+  if (val.startsWith('$')) {
+    target[prop] = `${component}${val.replace('$', '')}`
+  } else {
+    target[prop] = val
+  }
+}
+
+const interpolateObject = (input) => {
+  const interpolatedResults = []
+  Object.keys(input).forEach((key) => {
+    interpolatedResults.push(`${key}: ${input[key]}`)
+  })
+
+  return ` { ${interpolatedResults.join(', ')} }`
 }
