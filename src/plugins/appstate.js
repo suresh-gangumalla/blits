@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Comcast Cable Communications Management, LLC
+ * Copyright 2024 Comcast Cable Communications Management, LLC
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,12 +15,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import preCompiler from './preCompiler.js'
-import msdfGenerator from './msdfGenerator.js'
-import blitsFileConverter from './blitsFileConverter.js'
+import { reactive } from '../lib/reactivity/reactive'
 
-export { default as preCompiler } from './preCompiler.js'
-export { default as msdfGenerator } from './msdfGenerator.js'
-export { default as blitsFileConverter } from './blitsFileConverter.js'
-
-export default [blitsFileConverter(), preCompiler(), msdfGenerator()]
+export default {
+  name: 'appState',
+  plugin(state = {}) {
+    return reactive(state)
+  },
+}
