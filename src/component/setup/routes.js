@@ -67,10 +67,10 @@ const validateRoute = (route) => {
 
     const options = route['options']
     if ('inHistory' in options === true && typeof options['inHistory'] !== 'boolean') {
-      return `At path: options.inHistory -- Expected a value of type boolean, but received: ${options['inHistory']}}`
+      return `At path: options.inHistory -- Expected a value of type boolean, but received: ${options['inHistory']}`
     }
     if ('keepAlive' in options === true && typeof options['keepAlive'] !== 'boolean') {
-      return `At path: options.keepAlive -- Expected a value of type boolean, but received: ${options['keepAlive']}}`
+      return `At path: options.keepAlive -- Expected a value of type boolean, but received: ${options['keepAlive']}`
     }
 
     //Todo:: handle non required keys registered in options object
