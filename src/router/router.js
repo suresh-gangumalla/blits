@@ -22,6 +22,7 @@ import { Log } from '../lib/log.js'
 import { stage } from '../launch.js'
 import Focus from '../focus.js'
 import Announcer from '../announcer/announcer.js'
+import { resetEffectKeysRefs, removeEffectsFromMap } from '../lib/reactivity/effect.js'
 
 export let currentRoute
 export let navigating = false
@@ -117,6 +118,13 @@ export const navigate = async function () {
     let route = matchHash(hash, this.parent[symbols.routes])
     let beforeHookOutput
     if (route) {
+      // Make sure previous route effects are removed if it was not configured to keep alive
+      if (previousRoute && previousRoute.options.keepAlive !== true) {
+        removeEffectsFromMap()
+      } else {
+        // Clear effects key ref list so that next route references will be stored
+        resetEffectKeysRefs()
+      }
       if (route.hooks) {
         if (route.hooks.before) {
           beforeHookOutput = await route.hooks.before(route, previousRoute)

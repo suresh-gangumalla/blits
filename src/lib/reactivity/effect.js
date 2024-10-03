@@ -29,6 +29,18 @@ export const resumeTracking = () => {
 }
 
 const objectMap = new WeakMap()
+const effectKeyRefs = new Set()
+
+export const resetEffectKeysRefs = () => {
+  effectKeyRefs.clear()
+}
+
+export const removeEffectsFromMap = () => {
+  for (let key of effectKeyRefs) {
+    objectMap.has(key) && objectMap.delete(key)
+  }
+  resetEffectKeysRefs()
+}
 
 export const track = (target, key) => {
   if (currentEffect) {
@@ -43,6 +55,8 @@ export const track = (target, key) => {
       effectsMap = new Map()
       objectMap.set(target, effectsMap)
     }
+    // Store target key to delete effects associated with it later
+    effectKeyRefs.add(target)
     let effects = effectsMap.get(key)
     if (!effects) {
       effects = new Set()
