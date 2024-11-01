@@ -49,9 +49,20 @@ export default (component, props = []) => {
           Log.warn(`${prop.key} is required`)
         }
 
+        if (
+          prop.validate &&
+          typeof prop.validate === 'function' &&
+          prop.validate(value) === false
+        ) {
+          Log.warn(`Invalid prop: custom validator check failed for prop ${prop.key}.`)
+        }
+
         return value
       },
       set(v) {
+        if (prop.validate && typeof prop.validate === 'function' && prop.validate(v) === false) {
+          Log.warn(`Invalid prop: custom validator check failed for prop ${prop.key}.`)
+        }
         Log.warn(`Warning! Avoid mutating props directly (${prop.key})`)
         this[symbols.props][prop.key] = v
       },

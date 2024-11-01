@@ -271,6 +271,18 @@ declare module '@lightningjs/blits' {
      * ```
      */
     cast?: () => any
+    /**
+     * Custom validation function
+     *
+     * @example
+     * ```js
+     * {
+     *  validate: (v) => v > 100 &&  v < 10000
+     *  validate: (v) => v.includes('sample')
+     * }
+     * ```
+     */
+    validate?: (v) => boolean
   };
 
   // Props Array
