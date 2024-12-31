@@ -32,10 +32,10 @@ export default function () {
 
       // we should only precompile .js and .ts files
       if (fileExtension === '.js' || fileExtension === '.ts') {
-        return compiler(source, filePath)
+        return compiler(source, filePath, config.mode)
       }
       const relativePath = path.relative(process.cwd(), filePath)
-      return compiler(source, relativePath)
+      return compiler(source, relativePath, config.mode)
     },
   }
 }
