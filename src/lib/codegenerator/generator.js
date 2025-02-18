@@ -25,6 +25,9 @@ export default function (templateObject = { children: [] }) {
       'let componentType',
       'const rootComponent = component',
       'let propData',
+      'let slotComponent',
+      'let inSlot = false',
+      'let slotChildCounter = 0',
     ],
     effectsCode: [],
     context: { props: [], components: this.components },
@@ -102,7 +105,7 @@ const generateElementCode = function (
   }
 
   renderCode.push(`
-    ${elm} = this.element({parent: parent || 'root'}, component)
+    ${elm} = this.element({parent: parent || 'root'}, inSlot === true ? slotComponent : component)
   `)
 
   if (options.forloop) {
@@ -119,7 +122,7 @@ const generateElementCode = function (
   Object.keys(templateObject).forEach((key) => {
     if (key === 'slot') {
       renderCode.push(`
-        elementConfig${counter}['parent'] = component[Symbol.for('slots')].filter(slot => slot.ref === '${templateObject.slot}').shift() || parent
+        elementConfig${counter}['parent'] = component[Symbol.for('slots')] !== undefined && Array.isArray(component[Symbol.for('slots')]) === true && component[Symbol.for('slots')].filter(slot => slot.ref === '${templateObject.slot}').shift() || parent
       `)
     }
 
@@ -183,6 +186,12 @@ const generateElementCode = function (
   }
 
   renderCode.push(`${elm}.populate(elementConfig${counter})`)
+
+  renderCode.push(`
+    if(inSlot === true) {
+      slotChildCounter -= 1
+    }
+  `)
 
   if (options.forloop) {
     renderCode.push('}')
@@ -282,7 +291,8 @@ const generateComponentCode = function (
 
     if (${elm}[Symbol.for('slots')][0]) {
       parent = ${elm}[Symbol.for('slots')][0]
-      component = ${elm}
+      slotComponent = ${elm}
+      inSlot = true
     } else {
       parent = ${elm}[Symbol.for('children')][0]
     }
@@ -293,15 +303,24 @@ const generateComponentCode = function (
   }
 
   if (children) {
+    if (!options.forloop) {
+      renderCode.push(`
+        if(inSlot === true) {
+          slotChildCounter = ${children.length}  + 1
+        }
+      `)
+    }
     counter++
     generateElementCode.call(this, { children }, false, { ...options })
   }
-  // if (!options.forloop) {
-  //   renderCode.push(`
-  //     // console.log('here', component, rootComponent)
-  //   component = rootComponent
-  // `)
-  // }
+
+  if (!options.forloop) {
+    renderCode.push(`
+      if (inSlot === true && slotChildCounter === 0) {
+        inSlot = false
+      }
+    `)
+  }
 }
 
 const generateForLoopCode = function (templateObject, parent) {
@@ -323,7 +342,7 @@ const generateForLoopCode = function (templateObject, parent) {
   const result = regex.exec(forLoop)
 
   // can be improved with a smarter regex
-  const [item, index = 'index'] = result[1]
+  const [item, index] = result[1]
     .replace('(', '')
     .replace(')', '')
     .split(/\s*,\s*/)
@@ -341,12 +360,15 @@ const generateForLoopCode = function (templateObject, parent) {
     ctx.renderCode.push(`parent = ${parent}`)
   }
 
-  const indexRegex = new RegExp(`\\$${index}(?!['\\w])`)
-  const indexResult = indexRegex.exec(key)
-  if (Array.isArray(indexResult)) {
-    ctx.renderCode.push(
-      `console.warn(" Using '${index}' in the key, like key=${key},  is not recommended")`
-    )
+  // If the index variable is not defined, the key attribute would not reference it.
+  if (index !== undefined) {
+    const indexRegex = new RegExp(`\\$${index}(?!['\\w])`)
+    const indexResult = indexRegex.exec(key)
+    if (Array.isArray(indexResult)) {
+      ctx.renderCode.push(
+        `console.warn(" Using '${index}' in the key, like key=${key},  is not recommended")`
+      )
+    }
   }
 
   const forStartCounter = counter
@@ -359,7 +381,14 @@ const generateForLoopCode = function (templateObject, parent) {
       let l = rawCollection.length
       while(l--) {
         const ${item} = rawCollection[l]
+  `)
+  // push reference of index variable
+  if (index !== undefined) {
+    ctx.renderCode.push(`
         const ${index} = l
+    `)
+  }
+  ctx.renderCode.push(`
         keys.add('' +  ${interpolate(key, '') || 'l'})
       }
   `)
@@ -376,8 +405,15 @@ const generateForLoopCode = function (templateObject, parent) {
       for(let __index = 0; __index < length; __index++) {
         const scope = Object.create(component)
         parent = ${parent}
-        scope['${index}'] = __index
         scope['${item}'] = rawCollection[__index]
+  `)
+  // If the index variable is declared, include it in the scope object
+  if (index !== '') {
+    ctx.renderCode.push(`
+        scope['${index}'] = __index
+    `)
+  }
+  ctx.renderCode.push(`
         scope['key'] = '' + ${forKey || '__index'}
   `)
   if ('ref' in templateObject && templateObject.ref.indexOf('$') === -1) {

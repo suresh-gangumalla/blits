@@ -16,6 +16,7 @@
  */
 
 import { default as fadeInFadeOutTransition } from './transitions/fadeInOut.js'
+import { reactive } from '../lib/reactivity/reactive.js'
 
 import symbols from '../lib/symbols.js'
 import { Log } from '../lib/log.js'
@@ -24,7 +25,7 @@ import Focus from '../focus.js'
 import Announcer from '../announcer/announcer.js'
 
 export let currentRoute
-export let navigating = false
+export const state = reactive({ path: null, navigating: false })
 
 const cacheMap = new WeakMap()
 const history = []
@@ -35,7 +36,11 @@ let navigatingBack = false
 let previousFocus
 
 export const getHash = () => {
-  return (document.location.hash || '/').replace(/^#/, '')
+  const hashParts = (document.location.hash || '/').replace(/^#/, '').split('?')
+  return {
+    hash: hashParts[0],
+    queryParams: new URLSearchParams(hashParts[1]),
+  }
 }
 
 const normalizePath = (path) => {
@@ -110,10 +115,10 @@ export const matchHash = (path, routes = []) => {
 }
 
 export const navigate = async function () {
-  navigating = true
+  state.navigating = true
   if (this.parent[symbols.routes]) {
     const previousRoute = currentRoute
-    const hash = getHash()
+    const { hash, queryParams } = getHash()
     let route = matchHash(hash, this.parent[symbols.routes])
     let beforeHookOutput
     if (route) {
@@ -152,8 +157,21 @@ export const navigate = async function () {
         holder.populate({})
         holder.set('w', '100%')
         holder.set('h', '100%')
+
+        const queryParamsData = {}
+        const queryParamsEntries = [...queryParams.entries()]
+        for (let i = 0; i < queryParamsEntries.length; i++) {
+          queryParamsData[queryParamsEntries[i][0]] = queryParamsEntries[i][1]
+        }
+
         // merge props with potential route params, navigation data and route data to be injected into the component instance
-        const props = { ...this[symbols.props], ...route.params, ...navigationData, ...route.data }
+        const props = {
+          ...this[symbols.props],
+          ...route.params,
+          ...navigationData,
+          ...route.data,
+          ...queryParamsData,
+        }
 
         view = await route.component({ props }, holder, this)
         if (view[Symbol.toStringTag] === 'Module') {
@@ -220,6 +238,8 @@ export const navigate = async function () {
         }
       }
 
+      state.path = route.path
+
       // apply in transition
       if (route.transition.in) {
         if (Array.isArray(route.transition.in)) {
@@ -251,7 +271,7 @@ export const navigate = async function () {
 
   // reset navigating indicators
   navigatingBack = false
-  navigating = false
+  state.navigating = false
 }
 
 const removeView = async (route, view, transition) => {
@@ -303,9 +323,9 @@ export const to = (location, data = {}, options = {}) => {
   window.location.hash = `#${location}`
 }
 
-export const back = () => {
+export const back = function () {
   const route = history.pop()
-  if (route) {
+  if (route && currentRoute !== route) {
     // set indicator that we are navigating back (to prevent adding page to history stack)
     navigatingBack = true
     let targetRoutePath = route.path
@@ -316,9 +336,40 @@ export const back = () => {
     }
     to(targetRoutePath)
     return true
-  } else {
+  }
+
+  const backtrack = (currentRoute && currentRoute.options.backtrack) || false
+
+  // If we deeplink to a page without backtrack
+  // we we let the RouterView handle back
+  if (backtrack === false) {
     return false
   }
+
+  const hashEnd = /(\/:?[\w%\s-]+)$/
+  let path = currentRoute.path
+  let level = path.split('/').length
+
+  // On root return
+  if (level <= 1) {
+    return false
+  }
+
+  while (level--) {
+    if (!hashEnd.test(path)) {
+      return false
+    }
+    // Construct new path to backtrack to
+    path = path.replace(hashEnd, '')
+    const route = matchHash(path, this.parent[symbols.routes])
+
+    if (route && backtrack) {
+      to(route.path)
+      return true
+    }
+  }
+
+  return false
 }
 
 export default {
