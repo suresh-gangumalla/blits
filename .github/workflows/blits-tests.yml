@@ -16,14 +16,13 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: 20.18.3
-        cache: npm
+        node-version: 20
 
     - name: Install Dependencies
       run: npm install
 
     - name: Run Tests
-      run: npm run test > test-report.txt
+      run: npm run test
 
     - name: Post Test Results in PR
       uses: actions/github-script@v6
