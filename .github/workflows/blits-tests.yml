@@ -1,0 +1,38 @@
+name: Run Blits Tests
+
+on:
+  pull_request:
+    branches:
+      - dev
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 'lts'
+
+    - name: Install Dependencies
+      run: npm install
+
+    - name: Run Tests
+      run: npm run test > test-report.txt
+
+    - name: Post Test Results in PR
+      uses: actions/github-script@v6
+      with:
+       script: |
+          const fs = require('fs');
+          const testReport = fs.readFileSync('test-report.txt', 'utf8');
+          github.rest.issues.createComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+            body: `### Test Report\n\`\`\`\n${testReport}\n\`\`\``
+          });
