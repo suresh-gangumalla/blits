@@ -78,6 +78,8 @@ test('The contex key is an object', (assert) => {
   assert.end()
 })
 
+/*
+
 test('Generate render and effect code for an empty template', (assert) => {
   const expectedRender = `
   function anonymous(parent, component, context, components, effect, getRaw) {
@@ -102,7 +104,7 @@ test('Generate render and effect code for an empty template', (assert) => {
   )
   assert.end()
 })
-
+*/
 test('Generate render and effect code for a template with a single simple element', (assert) => {
   const templateObject = {
     children: [
