@@ -47,32 +47,20 @@ jobs:
             exit 1
         fi
     
-    - name: Find Comment By BOT in PR
-      uses: peter-evans/find-comment@v3
+    - name: Post Test Results as PR Comment
       if: always()
-      id: fc
+      uses: actions/github-script@v6
+      env:
+          SUMMARY: ${{ steps.extracted-test-summary.outputs.summary }}
       with:
-        issue-number: ${{ github.event.pull_request.number }}
-        comment-author: 'github-actions[bot]'
-        body-includes: Test Results Summary
+      script: |
+          github.rest.issues.createComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+            body: `**Test Results Summary:** (Ran at: ${{ steps.timestamp.outputs.timestamp }})\n${process.env.SUMMARY}`
+          });
 
-    - name: Create Comment in PR
-      if: steps.fc.outputs.comment-id == '' && always()
-      uses: peter-evans/create-or-update-comment@v4
-      with:
-        issue-number: ${{ github.event.pull_request.number }}
-        body: |
-          **Test Results Summary** 
-          ${{ steps.extracted-test-summary.outputs.summary}} 
-
-    - name: Update Comment in PR
-      if: steps.fc.outputs.comment-id != '' && always()
-      uses: peter-evans/create-or-update-comment@v4
-      with:
-        comment-id: ${{ steps.fc.outputs.comment-id }}
-        body: |
-          **Test Results Summary** (Last updated: ${{ steps.timestamp.outputs.timestamp }})
-          ${{ steps.extracted-test-summary.outputs.summary}}
         
     - name: Upload Test Report Artifact
       if: always()
