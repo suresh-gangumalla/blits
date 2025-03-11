@@ -7,7 +7,7 @@ on:
 
 jobs:
   run-tests:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout Code
@@ -23,13 +23,14 @@ jobs:
       run: npm install
 
     - name: Run Tests
-      run: npm run test
+      run: npm run test > test-report.txt
 
     - name: Post Test Results in PR
       uses: actions/github-script@v6
       with:
        script: |
           const fs = require('fs');
+          console.log("Inside script section")
           const testReport = fs.readFileSync('test-report.txt', 'utf8');
           github.rest.issues.createComment({
             owner: context.repo.owner,
