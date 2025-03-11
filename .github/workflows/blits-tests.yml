@@ -62,7 +62,7 @@ jobs:
       with:
         issue-number: ${{ github.event.pull_request.number }}
         body: |
-          **Test Results Summary** (Last updated: ${{ steps.timestamp.outputs.timestamp }}) 
+          **Test Results Summary** 
           ${{ steps.extracted-test-summary.outputs.summary}} 
 
     - name: Update Comment in PR
@@ -71,7 +71,6 @@ jobs:
       with:
         comment-id: ${{ steps.fc.outputs.comment-id }}
         body: |
-          \n\n
           **Test Results Summary** (Last updated: ${{ steps.timestamp.outputs.timestamp }})
           ${{ steps.extracted-test-summary.outputs.summary}}
         
