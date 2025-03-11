@@ -24,19 +24,50 @@ jobs:
 
     - name: Run Tests
       run: npm run test > test-report.txt
-      continue-on-error: true  
+      continue-on-error: true
 
-    - name: Post Test Results in PR
+    - name: Extract Test Summary
+      id: summary
+      run: |
+        # Search for a line containing both "passed:" and "failed:"
+        summary=$(grep -E "passed:.*failed:" test-report.txt | head -n1)
+        echo "Extracted summary: $summary"
+
+        # Extract the number of failed tests.
+        # This regex assumes a format like: "passed: ...  failed: <number> ..."
+        failed=$(echo "$summary" | sed -E 's/.*failed:\s*([0-9]+).*/\1/')
+        echo "Number of failed tests: $failed"
+        
+        # If the number of failed tests is greater than 1, exit with error.
+        if [ "$failed" -gt 1 ]; then
+            echo "Too many tests failed ($failed). Failing the job to block PR merge."
+            exit 1
+        fi
+
+        # Set output so it can be used later—in GitHub Actions, newer syntax is:
+        echo "summary=$summary" >> $GITHUB_OUTPUT
+
+    - name: Post Test Results as PR Comment
       if: always()
-      uses: actions/github-script@v6
+      uses: peter-evans/create-pull-request-comment@v2
       with:
-       script: |
-          const fs = require('fs');
-          console.log("Inside script section")
-          const testReport = fs.readFileSync('test-report.txt', 'utf8');
-          github.rest.issues.createComment({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            issue_number: context.issue.number,
-            body: `### Test Report\n\`\`\`\n${testReport}\n\`\`\``
-          });
+        token: ${{ secrets.GITHUB_TOKEN }}
+        body: |
+          **Test Results Summary**
+          ${{ steps.check-summary.outputs.summary }}
+    
+    # - name: Post Test Results in PR
+    #   if: always()
+    #   uses: actions/github-script@v6
+    #   with:
+    #    script: |
+    #       const fs = require('fs');
+    #       console.log("Inside script section")
+    #       const testReport = fs.readFileSync('test-report.txt', 'utf8');
+    #       github.rest.issues.createComment({
+    #         owner: context.repo.owner,
+    #         repo: context.repo.repo,
+    #         issue_number: context.issue.number,
+    #         body: `### Test Report\n\`\`\`\n${testReport}\n\`\`\``
+    #       });
+    
