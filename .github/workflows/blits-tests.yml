@@ -44,18 +44,6 @@ jobs:
             exit 1
         fi
 
-        
-       
-
-    # - name: Post Test Results as PR Comment
-    #   if: always()
-    #   uses: peter-evans/create-pull-request@v7
-    #   with:
-    #     token: ${{ secrets.GITHUB_TOKEN }}
-    #     body: |
-    #       **Test Results Summary**
-    #       ${{ steps.check-summary.outputs.summary }}
-    
     - name: Post Test Results as PR Comment
       if: always()
       uses: actions/github-script@v6
@@ -69,4 +57,11 @@ jobs:
             issue_number: context.issue.number,
             body: `**Test Results Summary:**\n${process.env.SUMMARY}`
           });
+        
+    - name: Upload Test Report Artifact
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-report
+        path: test-report.txt
     
