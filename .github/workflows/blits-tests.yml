@@ -6,7 +6,7 @@ on:
       - dev
 
 jobs:
-  run-tests:
+  run-blits-tests:
     runs-on: ubuntu-latest
 
     steps:
@@ -24,7 +24,8 @@ jobs:
 
     - name: Run Tests
       run: npm run test > test-report.txt
-      continue-on-error: true
+      # To make sure next steps to execute
+      continue-on-error: true 
 
     - name: Get Current Timestamp
       id: timestamp
@@ -36,11 +37,9 @@ jobs:
         # Search for a line containing both "passed:" and "failed:"
         summary=$(grep -E "passed:.*failed:" test-report.txt | head -n1)
         
-        # Extract the number of failed tests.
-        # This regex assumes a format like: "passed: ...  failed: <number> ..."
+        # Extract the number of failed tests
         failed=$(echo "$summary" | sed -E 's/.*failed:\s*([0-9]+).*/\1/')
         
-        # Set output so it can be used later—in GitHub Actions
         echo "summary=$summary" >> $GITHUB_OUTPUT
         
         # If the number of failed tests is greater than 1, exit with error.
@@ -63,8 +62,8 @@ jobs:
       with:
         issue-number: ${{ github.event.pull_request.number }}
         body: |
-          **Test Results Summary**  
-          ${{ steps.extracted-test-summary.outputs.summary}}
+          **Test Results Summary** (Last updated: ${{ steps.timestamp.outputs.timestamp }}) 
+          ${{ steps.extracted-test-summary.outputs.summary}} 
 
     - name: Update Comment in PR
       if: steps.fc.outputs.comment-id != '' && always()
@@ -72,22 +71,9 @@ jobs:
       with:
         comment-id: ${{ steps.fc.outputs.comment-id }}
         body: |
+          \n\n
           **Test Results Summary** (Last updated: ${{ steps.timestamp.outputs.timestamp }})
           ${{ steps.extracted-test-summary.outputs.summary}}
-
-    # - name: Post Test Results as PR Comment
-    #   if: always()
-    #   uses: actions/github-script@v6
-    #   env:
-    #       SUMMARY: ${{ steps.extracted-test-summary.outputs.summary }}
-    #   with:
-    #    script: |
-    #       github.rest.issues.createComment({
-    #         owner: context.repo.owner,
-    #         repo: context.repo.repo,
-    #         issue_number: context.issue.number,
-    #         body: `**Test Results Summary:**\n${process.env.SUMMARY}`
-    #       });
         
     - name: Upload Test Report Artifact
       if: always()
