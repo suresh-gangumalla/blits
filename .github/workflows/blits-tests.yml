@@ -46,6 +46,7 @@ jobs:
 
     - name: Find Comment
       uses: peter-evans/find-comment@v3
+      if: always()
       id: fc
       with:
         issue-number: ${{ github.event.pull_request.number }}
@@ -53,7 +54,7 @@ jobs:
         body-includes: Test Results Summary
 
     - name: Create Comment in PR
-      if: steps.fc.outputs.comment-id == ''
+      if: steps.fc.outputs.comment-id == '' && always()
       uses: peter-evans/create-or-update-comment@v4
       with:
         issue-number: ${{ github.event.pull_request.number }}
@@ -63,7 +64,7 @@ jobs:
         reactions: rocket
 
     - name: Update Comment in PR
-      if: steps.fc.outputs.comment-id != ''
+      if: steps.fc.outputs.comment-id != '' && always()
       uses: peter-evans/create-or-update-comment@v4
       with:
         comment-id: ${{ steps.fc.outputs.comment-id }}
