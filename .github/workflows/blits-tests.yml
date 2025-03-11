@@ -44,19 +44,47 @@ jobs:
             exit 1
         fi
 
-    - name: Post Test Results as PR Comment
-      if: always()
-      uses: actions/github-script@v6
-      env:
-          SUMMARY: ${{ steps.extracted-test-summary.outputs.summary }}
+    - name: Find Comment
+      uses: peter-evans/find-comment@v3
+      id: fc
       with:
-       script: |
-          github.rest.issues.createComment({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            issue_number: context.issue.number,
-            body: `**Test Results Summary:**\n${process.env.SUMMARY}`
-          });
+        issue-number: ${{ github.event.pull_request.number }}
+        comment-author: 'github-actions[bot]'
+        body-includes: Test Results Summary
+
+    - name: Create Comment in PR
+      if: steps.fc.outputs.comment-id == ''
+      uses: peter-evans/create-or-update-comment@v4
+      with:
+        issue-number: ${{ github.event.pull_request.number }}
+        body: |
+          **Test Results Summary** 
+          ${{ steps.extracted-test-summary.outputs.summary}}
+        reactions: rocket
+
+    - name: Update Comment in PR
+      if: steps.fc.outputs.comment-id != ''
+      uses: peter-evans/create-or-update-comment@v4
+      with:
+        comment-id: ${{ steps.fc.outputs.comment-id }}
+        body: |
+          **Test Results Summary** 
+          ${{ steps.extracted-test-summary.outputs.summary}}
+        reactions: hooray
+
+    # - name: Post Test Results as PR Comment
+    #   if: always()
+    #   uses: actions/github-script@v6
+    #   env:
+    #       SUMMARY: ${{ steps.extracted-test-summary.outputs.summary }}
+    #   with:
+    #    script: |
+    #       github.rest.issues.createComment({
+    #         owner: context.repo.owner,
+    #         repo: context.repo.repo,
+    #         issue_number: context.issue.number,
+    #         body: `**Test Results Summary:**\n${process.env.SUMMARY}`
+    #       });
         
     - name: Upload Test Report Artifact
       if: always()
