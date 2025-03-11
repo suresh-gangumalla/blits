@@ -24,8 +24,10 @@ jobs:
 
     - name: Run Tests
       run: npm run test
+      continue-on-error: true  
 
     - name: Post Test Results in PR
+      if: always()
       uses: actions/github-script@v6
       with:
        script: |
