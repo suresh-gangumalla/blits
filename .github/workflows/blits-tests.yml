@@ -27,7 +27,7 @@ jobs:
       continue-on-error: true
 
     - name: Extract Test Summary
-      id: summary
+      id: extracted-test-summary
       run: |
         # Search for a line containing both "passed:" and "failed:"
         summary=$(grep -E "passed:.*failed:" test-report.txt | head -n1)
@@ -47,27 +47,26 @@ jobs:
         # Set output so it can be used later—in GitHub Actions, newer syntax is:
         echo "summary=$summary" >> $GITHUB_OUTPUT
 
+    # - name: Post Test Results as PR Comment
+    #   if: always()
+    #   uses: peter-evans/create-pull-request@v7
+    #   with:
+    #     token: ${{ secrets.GITHUB_TOKEN }}
+    #     body: |
+    #       **Test Results Summary**
+    #       ${{ steps.check-summary.outputs.summary }}
+    
     - name: Post Test Results as PR Comment
       if: always()
-      uses: peter-evans/create-pull-request@v7
+      uses: actions/github-script@v6
+      env:
+          SUMMARY: ${{ steps.extracted-test-summary.outputs.summary }}
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        body: |
-          **Test Results Summary**
-          ${{ steps.check-summary.outputs.summary }}
-    
-    # - name: Post Test Results in PR
-    #   if: always()
-    #   uses: actions/github-script@v6
-    #   with:
-    #    script: |
-    #       const fs = require('fs');
-    #       console.log("Inside script section")
-    #       const testReport = fs.readFileSync('test-report.txt', 'utf8');
-    #       github.rest.issues.createComment({
-    #         owner: context.repo.owner,
-    #         repo: context.repo.repo,
-    #         issue_number: context.issue.number,
-    #         body: `### Test Report\n\`\`\`\n${testReport}\n\`\`\``
-    #       });
+       script: |
+          github.rest.issues.createComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+            body: `**Test Results Summary:**\n${process.env.SUMMARY}`
+          });
     
