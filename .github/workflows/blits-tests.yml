@@ -31,21 +31,21 @@ jobs:
       run: |
         # Search for a line containing both "passed:" and "failed:"
         summary=$(grep -E "passed:.*failed:" test-report.txt | head -n1)
-        echo "Extracted summary: $summary"
-
+        
         # Extract the number of failed tests.
         # This regex assumes a format like: "passed: ...  failed: <number> ..."
         failed=$(echo "$summary" | sed -E 's/.*failed:\s*([0-9]+).*/\1/')
-        echo "Number of failed tests: $failed"
+        
+        # Set output so it can be used later—in GitHub Actions
+        echo "summary=$summary" >> $GITHUB_OUTPUT
         
         # If the number of failed tests is greater than 1, exit with error.
         if [ "$failed" -gt 1 ]; then
-            echo "Too many tests failed ($failed). Failing the job to block PR merge."
             exit 1
         fi
 
-        # Set output so it can be used later—in GitHub Actions, newer syntax is:
-        echo "summary=$summary" >> $GITHUB_OUTPUT
+        
+       
 
     # - name: Post Test Results as PR Comment
     #   if: always()
