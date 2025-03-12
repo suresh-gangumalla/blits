@@ -58,7 +58,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number,
-              body: `**Test Results Summary:** (Ran at: ${timestamp})\n${process.env.SUMMARY}`
+              body: `**Test Results Summary:** (Ran at: ${process.env.TIMESTAMP})\n${process.env.SUMMARY}`
             });
         
     - name: Upload Test Report Artifact
