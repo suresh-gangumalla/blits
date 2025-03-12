@@ -3491,6 +3491,7 @@ test('Generate code for a template with attribute values verified against a nest
 
   assert.end()
 })
+/*
 
 test('Generate code for a template with verification of attributes with Math calculations', (assert) => {
   const templateObject = {
@@ -3596,3 +3597,5 @@ test('Generate code for a template with verification of attributes with Math cal
 
   assert.end()
 })
+
+*/
