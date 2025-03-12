@@ -53,13 +53,13 @@ jobs:
           SUMMARY: ${{ steps.extracted-test-summary.outputs.summary }}
           TIMESTAMP: ${{ steps.timestamp.outputs.timestamp }}
       with:
-      script: |
-          github.rest.issues.createComment({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            issue_number: context.issue.number,
-            body: `**Test Results Summary:** (Ran at: ${timestamp})\n${process.env.SUMMARY}`
-          });
+        script: |
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `**Test Results Summary:** (Ran at: ${timestamp})\n${process.env.SUMMARY}`
+            });
         
     - name: Upload Test Report Artifact
       if: always()
