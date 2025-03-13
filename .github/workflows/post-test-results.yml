@@ -1,0 +1,33 @@
+name: Post Test Results
+
+on:
+  workflow_run:
+    workflows:
+      - Run Blits Tests
+    types:
+      - completed
+
+jobs:
+  comment:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get Current Timestamp
+        id: timestamp
+        run: echo "timestamp=$(date)" >> $GITHUB_OUTPUT
+
+      - name: Post Test Results as Comment
+        uses: actions/github-script@v6
+        env:
+          SUMMARY: ${{ github.event.workflow_run.outputs.tests_summary }}
+          TIMESTAMP: ${{ steps.timestamp.outputs.timestamp }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const prNumber = ${{ github.event.workflow_run.pull_requests[0].number }};
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: `**Test Results Summary:** (Ran at: ${process.env.TIMESTAMP})\n${process.env.SUMMARY}`
+            });
