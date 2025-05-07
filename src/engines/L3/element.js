@@ -22,6 +22,8 @@ import { Log } from '../../lib/log.js'
 import symbols from '../../lib/symbols.js'
 import Settings from '../../settings.js'
 
+const layoutAffectedProps = ['w', 'width', 'h', 'height', 'content', 'size', 'font']
+
 // temporary counter to work around shader caching issues
 let counter = 0
 
@@ -533,7 +535,11 @@ const Element = {
       }
     }
 
-    if (this.config.parent.props && this.config.parent.props.__layout === true) {
+    if (
+      this.config.parent.props &&
+      this.config.parent.props.__layout === true &&
+      layoutAffectedProps.indexOf(prop) !== -1
+    ) {
       this.config.parent.triggerLayout(this.config.parent.props)
     }
   },
@@ -587,7 +593,11 @@ const Element = {
       })
     }
 
-    if (this.config.parent.props && this.config.parent.props.__layout === true) {
+    if (
+      this.config.parent.props &&
+      this.config.parent.props.__layout === true &&
+      layoutAffectedProps.indexOf(prop) !== -1
+    ) {
       f.on('tick', () => {
         this.config.parent.triggerLayout(this.config.parent.props)
       })
