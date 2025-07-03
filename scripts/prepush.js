@@ -59,6 +59,7 @@ if (!filesToLint.trim()) {
 }
 
 const fileList = filesToLint.trim().split('\n')
+
 console.log(`Running ESLint on ${fileList.length} changed JavaScript files:\n`)
 console.log(filesToLint)
 

@@ -15,8 +15,9 @@
   "scripts": {
     "test": "c8 npm run test:run",
     "test:run": "node -r global-jsdom/register ./node_modules/.bin/tape '{,!(node_modules|packages)/**/}*.test.js' | tap-diff",
-    "lint": "eslint '**/*.js'",
-    "lint:fix": "eslint '**/*.js' --fix",
+    "test:visual": "cd visual-tests && npm test:visual",
+    "lint": "eslint \"**/*.js\"",
+    "lint:fix": "eslint \"**/*.js\" --fix",
     "prepublishOnly": "node scripts/prepublishOnly.js",
     "postpublish": "node scripts/postpublish.js",
     "prepare": "husky"
