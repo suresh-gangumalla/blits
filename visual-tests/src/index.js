@@ -239,7 +239,7 @@ async function runTest(browserType = 'chromium') {
   }
 
   // Launch browser and create page
-  const browser = await browsers[browserType].launch({ headless: false })
+  const browser = await browsers[browserType].launch()
 
   const page = await browser.newPage()
 
