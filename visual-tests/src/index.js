@@ -241,7 +241,9 @@ async function runTest(browserType = 'chromium') {
   // Launch browser and create page
   const browser = await browsers[browserType].launch()
 
-  const page = await browser.newPage()
+  const context = await browser.newContext({ viewport: { width: 1920, height: 1080 } })
+
+  const page = await context.newPage()
 
   // If verbose, log out console messages from the browser
   if (argv.verbose) {

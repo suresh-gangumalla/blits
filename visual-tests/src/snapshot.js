@@ -134,17 +134,14 @@ export function compareBuffers(actualImageBuffer, expectedImageBuffer, width, he
       reason: 'Image dimensions do not match',
     }
   }
-  const count = 0
-
-  // const count = pixelmatch(
-  //   actualImage.data,
-  //   expectedImage.data,
-
-  //   diff.data,
-  //   width,
-  //   height,
-  //   { threshold: 0.1 } // Adjust threshold for sensitivity
-  // )
+  const count = pixelmatch(
+    actualImage.data,
+    expectedImage.data,
+    diff.data,
+    width,
+    height,
+    { threshold: 0.1 } // Adjust threshold for sensitivity
+  )
 
   const doesMatch = count === 0
 
