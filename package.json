@@ -16,10 +16,12 @@
     "test": "c8 npm run test:run",
     "test:run": "node -r global-jsdom/register ./node_modules/.bin/tape '{,!(node_modules|packages)/**/}*.test.js' | tap-diff",
     "lint": "eslint '**/*.js'",
-    "lint:fix": "eslint '**/*.js' --fix",
+    "lint:fix": "eslint \"**/*.js\" --fix",
     "prepublishOnly": "node scripts/prepublishOnly.js",
     "postpublish": "node scripts/postpublish.js",
-    "prepare": "husky"
+    "prepare": "husky",
+    "build:docker": "cd visual-tests && npm run build:docker",
+    "test:visual": "cd visual-tests && npm run test:visual"
   },
   "types": "./index.d.ts",
   "lint-staged": {
