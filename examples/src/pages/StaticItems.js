@@ -24,7 +24,7 @@ export default Blits.Component('CreateItemsIncrementally', {
   hooks: {
     init() {
       let data = []
-      const colors = ['#f5f3ff', '#ede9fe', '#ddd6fe', '#c4b5fd', '#a78bfa']
+      const colors = ['#1a1aff', '#cc0066', '#00802b', '#6600cc', '#b35900', '#004d99', '#800000']
       const margin = 50
       const spacing = 20
       const rectWidth = 286
@@ -46,8 +46,11 @@ export default Blits.Component('CreateItemsIncrementally', {
       }
       this.items = data
     },
-    ready() {
-      this.$emit('take-snapshot', 'static-blocks')
+    async ready() {
+      this.$setTimeout(async () => {
+        await window.snapshot('static-blocks', {})
+        this.$emit('move-to-next')
+      }, 500)
     },
   },
 })

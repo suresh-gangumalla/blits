@@ -26,7 +26,6 @@ import { hideBin } from 'yargs/helpers'
 import { execa, $ } from 'execa'
 import { fileURLToPath } from 'url'
 import { compareSnapshot, saveSnapshot } from './snapshot.js'
-import { executeTests } from './test.js'
 
 export const certifiedSnapshotDir = 'certified-snapshots'
 export const failedResultsDir = 'failed-results'
@@ -38,6 +37,8 @@ let snapshotsTested = 0
 let snapshotsPassed = 0
 let snapshotsFailed = 0
 let snapshotsSkipped = 0
+
+let jsHeapData = {}
 
 /**
  * The runtime environment (local, ci, etc.)
@@ -238,12 +239,20 @@ async function runTest(browserType = 'chromium') {
     await fs.emptyDir(failedResultsDir)
   }
 
+  // Read JS Heap data
+  const jsHeapDataFilePath = path.join(snapshotSubDir, 'js-heap.json')
+  if (fs.existsSync(jsHeapDataFilePath)) {
+    jsHeapData = JSON.parse(fs.readFileSync(jsHeapDataFilePath))
+  }
+
   // Launch browser and create page
   const browser = await browsers[browserType].launch()
 
   const context = await browser.newContext({ viewport: { width: 1920, height: 1080 } })
 
   const page = await context.newPage()
+
+  let collectJsHeap = () => {}
 
   // If verbose, log out console messages from the browser
   if (argv.verbose) {
@@ -298,7 +307,28 @@ async function runTest(browserType = 'chromium') {
         snapshotsFailed++
       }
     }
-    executeTests(page, argv.port)
+  })
+
+  await page.exposeFunction('memory', async (test) => {
+    const jsHeap = await collectJsHeap()
+    const jsHeapInMB = (jsHeap / 1024 / 1024).toFixed(2)
+    console.log(chalk.gray(`JS Heap Size For "${test}": ${jsHeapInMB} MB \n`))
+
+    if (argv.capture) {
+      // Handle memory capturing
+
+      if (Object.keys(jsHeapData).includes(test) && !argv.overwrite) {
+        console.log(chalk.yellow.bold('SKIPPED! (already exists)\n'))
+      } else {
+        jsHeapData[test] = jsHeapInMB
+      }
+    } else {
+      // Handle memory comparison
+      const recordedJSHeap = jsHeapData[test]
+      console.log(chalk.grey(`Recorded JS Heap Size For "${test} :", ${recordedJSHeap}`))
+      const diff = jsHeapInMB - recordedJSHeap
+      console.log(chalk.gray(`"${test}" JS Heap Diff: ${diff} MB \n`))
+    }
   })
 
   /**
@@ -319,6 +349,12 @@ async function runTest(browserType = 'chromium') {
   // which will close the browser, calculate/print results and resolve the donePromise
   await page.exposeFunction('doneTests', async () => {
     await browser.close()
+
+    // Save JS Heap Data
+    if (argv.capture) {
+      console.log('Writing JS Heap Data At', jsHeapDataFilePath)
+      fs.writeFileSync(jsHeapDataFilePath, JSON.stringify(jsHeapData, null, 4))
+    }
 
     // Summarize results
 
@@ -363,6 +399,20 @@ async function runTest(browserType = 'chromium') {
     }
   })
 
-  executeTests(page, argv.port)
+  // set CPU to 6x slowdown
+  const client = await page.context().newCDPSession(page)
+  await client.send('Emulation.setCPUThrottlingRate', { rate: 6 })
+
+  /**
+   * Collects the JavaScript heap size.
+   */
+  collectJsHeap = async () => {
+    await client.send('Performance.enable')
+    const performanceMetrics = await client.send('Performance.getMetrics')
+    await client.send('Performance.disable')
+    return performanceMetrics.metrics.find((m) => m.name === 'JSHeapUsedSize').value
+  }
+
+  await page.goto(`http://localhost:${argv.port}/`)
   return donePromise
 }

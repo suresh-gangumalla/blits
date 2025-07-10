@@ -1,38 +1,38 @@
 import Blits from '@lightningjs/blits'
 
 import StaticItems from './pages/StaticItems'
-import Layout from './pages/Layout'
+import RandomBlocks from './pages/RandomBlocks'
 
 export default Blits.Application({
   template: `
-    <Element>
+    <Element w="1920" h="1080">
       <RouterView />
     </Element>
   `,
   state() {
     return {
-      counter: 0,
+      counter: 1,
+      totalTests: 2,
     }
   },
   hooks: {
     init() {
-      this.$listen('take-snapshot', async (name) => {
-        window.snapshot(name, {})
-        this.counter++
-        if (this.counter >= 2) {
-          // Invoke doneTests
-          this.$setTimeout(() => {
-            window.doneTests()
-          }, 1000)
+      this.$listen('move-to-next', () => {
+        if (this.counter >= this.totalTests) {
+          window.doneTests()
+        } else {
+          // navigate to next route
+          this.$router.to('/random')
         }
+        this.counter++
       })
     },
   },
   routes: [
     { path: '/', component: StaticItems },
     {
-      path: '/layout',
-      component: Layout,
+      path: '/random',
+      component: RandomBlocks,
     },
   ],
 })
