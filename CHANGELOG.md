@@ -1,5 +1,79 @@
 # Changelog
 
+_10 Jul 2025_
+
+## v1.34.0
+
+- Added storage plugin
+- Improved test coverage
+- Fixed announcer plugin to work on RDK devices where early GC was happening
+- Added check to throttle only the same input key in a row
+- Updated docs on transitions
+- Added warning when using `hasFocus` in component state
+
+_08 Jul 2025_
+
+## v1.33.0
+
+- Added dereferencing of previousFocus pointer to ensure memory cleanup
+- Improved cleanup of components (via explicit dereference of closure scope)
+- Optimized time function in logger
+- Optimized initial registration of routes
+- Added `maxFPS` launch setting
+
+_04 Jul 2025_
+
+## v1.32.1
+
+- Fixed issue with router data overwriting the orginal route definition
+
+_02 Jul 2025_
+
+## v1.32.0
+
+- Added global router hooks `init` and `error`
+- Fixed issues with `this` scope in global router hooks
+- Fixed issue with `data` in `beforeEach` route not being complete
+- Added input throttling functionality
+- Optimized performance of children retrieval in `<Layout>`
+- Added documentation on global router hooks
+
+_30 Jun 2025_
+
+## v1.31.1
+
+- Upgraded renderer to v2.15.0
+
+_30 Jun 2025_
+
+## v1.31.1
+
+- Upgraded renderer to v2.14.4
+
+_27 jun 2025_
+
+## v1.31.0
+
+- Added dereferencing of previousFocus pointer to ensure memory release
+- Added npm ignore to reduce NPM package size
+- Added support for precompilation of `.mjs` files
+- Upgraded renderer to v2.14.3
+
+
+_25 jun 2025_
+
+## v1.30.2
+
+- Bumped renderer to v2.14.2
+
+
+_25 jun 2025_
+
+## v1.30.1
+
+- Bumped renderer to v2.14.1
+
+
 _24 jun 2025_
 
 ## v1.30.0
