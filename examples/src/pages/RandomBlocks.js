@@ -17,8 +17,11 @@ export default Blits.Component('RandomBlocks', {
   hooks: {
     async ready() {
       this.items = createItems(1000)
-      await window.memory('Random-blocks')
-      this.$emit('move-to-next')
+      this.$setTimeout(async () => {
+        this.items = []
+        await window.memory('Random-blocks')
+        this.$emit('move-to-next')
+      }, 1000)
     },
   },
 })

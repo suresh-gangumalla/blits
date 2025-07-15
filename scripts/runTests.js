@@ -25,9 +25,12 @@ const __dirname = resolve(__filename, '../..')
 
 try {
   // Find all *.test.js files excluding node_modules and packages
-  const testFiles = await fg(['**/*.test.js', '!node_modules/**', '!packages/**'], {
-    cwd: __dirname,
-  })
+  const testFiles = await fg(
+    ['**/*.test.js', '!node_modules/**', '!packages/**', '!examples/**', '!visual-tests/'],
+    {
+      cwd: __dirname,
+    }
+  )
 
   if (testFiles.length === 0) {
     console.log('No test files were found to run')
