@@ -13,15 +13,6 @@ const registerPlugin = (plugin, nameOrOptions = '', options = {}) => {
   } else {
     name = nameOrOptions
   }
-
-  if (typeof plugin === 'function') {
-    if (name === undefined || name === '') {
-      throw Error('Error registering plugin: name is required for plugin')
-    }
-    plugins[name] = { plugin, options }
-  } else if (plugin.plugin) {
-    registerPlugin(plugin.plugin, name || plugin.name, options)
-  }
 }
 
 export default registerPlugin

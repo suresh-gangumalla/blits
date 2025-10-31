@@ -52,9 +52,6 @@ async function rendererVersion() {
   try {
     // Dynamically import the renderer package.json
     rendererPackageInfo = await import('../../renderer/package.json')
-    if (rendererPackageInfo !== undefined) {
-      return rendererPackageInfo.version
-    }
   } catch (e) {
     // Fallback to renderer version in dependencies
     return blitsPackageInfo.dependencies['@lightningjs/renderer']
