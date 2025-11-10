@@ -48,12 +48,19 @@ export let renderer = {}
 export const stage = {}
 
 async function rendererVersion() {
-  let rendererPackageInfo
   try {
     // Dynamically import the renderer package.json
-    rendererPackageInfo = await import('../../renderer/package.json')
-    if (rendererPackageInfo !== undefined) {
-      return rendererPackageInfo.version
+    const rendererPackagePath = '../../renderer/package.json'
+    // Handles local installations where the renderer packages might not be present
+    const doesPathExists = await import.meta
+      .resolve(rendererPackagePath)
+      .then(() => true)
+      .catch(() => false)
+    if (doesPathExists) {
+      const { version } = await import(rendererPackagePath)
+      if (version !== undefined) {
+        return version
+      }
     }
   } catch (e) {
     // Fallback to renderer version in dependencies
