@@ -56,8 +56,8 @@
     "tape": "^5.5.0"
   },
   "dependencies": {
-    "@lightningjs/renderer": "^3.0.0-beta15",
-    "@lightningjs/msdf-generator": "^1.2.0"
+    "@lightningjs/msdf-generator": "^1.2.0",
+    "@lightningjs/renderer": "github:lightning-js/renderer#fix/text-contain"
   },
   "repository": {
     "type": "git",
