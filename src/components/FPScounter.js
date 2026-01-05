@@ -15,13 +15,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import Blits from '../../index.js'
+import Component from '../component.js'
 import { renderer } from '../launch.js'
 import fps_sprite from '../../public/assets/fps_sprite.base64.js'
 
-// exporting as named export to allow selective importing
-export const FPScounter = Blits.Component('FPScounter', {
-  template: `
+export default () =>
+  Component('FPScounter', {
+    template: `
     <Element>
       <Element y="15" x="20">
         <Element>
@@ -62,59 +62,59 @@ export const FPScounter = Blits.Component('FPScounter', {
       </Element>
     </Element>
   `,
-  state() {
-    return {
-      image: fps_sprite,
-      sprite: {
-        defaults: {
-          y: 1,
-          w: 20,
-          h: 20,
+    state() {
+      return {
+        image: fps_sprite,
+        sprite: {
+          defaults: {
+            y: 1,
+            w: 20,
+            h: 20,
+          },
+          frames: {
+            '-': { x: -1000 },
+            0: { x: 1 },
+            1: { x: 23 },
+            2: { x: 45 },
+            3: { x: 67 },
+            4: { x: 89 },
+            5: { x: 111 },
+            6: { x: 133 },
+            7: { x: 155 },
+            8: { x: 177 },
+            9: { x: 199 },
+            avg: { x: 221, w: 48, h: 25 },
+            fps: { x: 271, w: 43, h: 25 },
+            max: { x: 316, w: 53, h: 25 },
+            min: { x: 371, w: 47, h: 25 },
+          },
         },
-        frames: {
-          '-': { x: -1000 },
-          0: { x: 1 },
-          1: { x: 23 },
-          2: { x: 45 },
-          3: { x: 67 },
-          4: { x: 89 },
-          5: { x: 111 },
-          6: { x: 133 },
-          7: { x: 155 },
-          8: { x: 177 },
-          9: { x: 199 },
-          avg: { x: 221, w: 48, h: 25 },
-          fps: { x: 271, w: 43, h: 25 },
-          max: { x: 316, w: 53, h: 25 },
-          min: { x: 371, w: 47, h: 25 },
-        },
-      },
-      fps: '---',
-      avgFps: '---',
-      minFps: '---',
-      maxFps: '---',
-    }
-  },
-  hooks: {
-    ready() {
-      let minFps = 10000
-      let maxFps = 0
-      let avgFps = 0
-      let totalFps = 0
-      let fpsUpdateCounter = 0
-
-      renderer.on('fpsUpdate', (rM, { fps }) => {
-        minFps = Math.min(fps, minFps)
-        maxFps = Math.max(fps, maxFps)
-        totalFps += fps
-        fpsUpdateCounter++
-        avgFps = Math.round(totalFps / fpsUpdateCounter)
-
-        this.fps = fps.toString().padStart(3, '0')
-        this.avgFps = avgFps.toString().padStart(3, '0')
-        this.minFps = minFps.toString().padStart(3, '0')
-        this.maxFps = maxFps.toString().padStart(3, '0')
-      })
+        fps: '---',
+        avgFps: '---',
+        minFps: '---',
+        maxFps: '---',
+      }
     },
-  },
-})
+    hooks: {
+      ready() {
+        let minFps = 10000
+        let maxFps = 0
+        let avgFps = 0
+        let totalFps = 0
+        let fpsUpdateCounter = 0
+
+        renderer.on('fpsUpdate', (rM, { fps }) => {
+          minFps = Math.min(fps, minFps)
+          maxFps = Math.max(fps, maxFps)
+          totalFps += fps
+          fpsUpdateCounter++
+          avgFps = Math.round(totalFps / fpsUpdateCounter)
+
+          this.fps = fps.toString().padStart(3, '0')
+          this.avgFps = avgFps.toString().padStart(3, '0')
+          this.minFps = minFps.toString().padStart(3, '0')
+          this.maxFps = maxFps.toString().padStart(3, '0')
+        })
+      },
+    },
+  })
