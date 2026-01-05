@@ -495,7 +495,7 @@ export const navigate = async function () {
       if (route.transition.in) {
         if (Array.isArray(route.transition.in)) {
           for (let i = 0; i < route.transition.in.length; i++) {
-            i === route.transition.length - 1
+            i === route.transition.in.length - 1
               ? await setOrAnimate(holder, route.transition.in[i], shouldAnimate)
               : setOrAnimate(holder, route.transition.in[i], shouldAnimate)
           }
