@@ -25,10 +25,10 @@ let initialized = false
 
 const clear = (id) => {
   const state = utterances.get(id)
-  if (!state) {
+  if (state === undefined) {
     return
   }
-  if (state && state.timer !== null) {
+  if (state.timer !== null) {
     clearTimeout(state.timer)
     state.timer = null
   }
@@ -39,12 +39,12 @@ const startKeepAlive = (id) => {
   const state = utterances.get(id)
 
   // utterance status: utterance was removed (cancelled or finished)
-  if (!state) {
+  if (state == undefined) {
     return
   }
 
   // Clear existing timer for this specific utterance
-  if (state && state.timer !== null) {
+  if (state.timer !== null) {
     clearTimeout(state.timer)
     state.timer = null
   }
@@ -66,10 +66,10 @@ const startKeepAlive = (id) => {
   }, 0)
 
   // Check if utterance still exists before scheduling next cycle
-  if (utterances.has(id)) {
+  if (utterances.has(id) === true) {
     state.timer = setTimeout(() => {
       // Double-check utterance still exists before resuming
-      if (utterances.has(id)) {
+      if (utterances.has(id) === true) {
         startKeepAlive(id)
       }
     }, 5000)
@@ -99,35 +99,35 @@ const initialize = () => {
 const waitForSynthReady = (timeoutMs = 2000, checkIntervalMs = 100) => {
   return new Promise((resolve) => {
     if (!syn) {
-      Log.warn('SpeechSynthesis - syn unavailable')
+      Log.debug('SpeechSynthesis - syn unavailable')
       resolve()
       return
     }
 
     if (!syn.speaking && !syn.pending) {
-      Log.warn('SpeechSynthesis - ready immediately')
+      Log.debug('SpeechSynthesis - ready immediately')
       resolve()
       return
     }
 
-    Log.warn('SpeechSynthesis - waiting for ready state...')
+    Log.debug('SpeechSynthesis - waiting for ready state...')
 
     const startTime = Date.now()
 
-    const intervalId = window.setInterval(() => {
+    const intervalId = setInterval(() => {
       const elapsed = Date.now() - startTime
       const isReady = !syn.speaking && !syn.pending
 
       if (isReady) {
         Log.debug(`SpeechSynthesis - ready after ${elapsed}ms`)
-        window.clearInterval(intervalId)
+        clearInterval(intervalId)
         resolve()
       } else if (elapsed >= timeoutMs) {
-        Log.warn(`SpeechSynthesis - timeout after ${elapsed}ms, forcing ready`, {
+        Log.debug(`SpeechSynthesis - timeout after ${elapsed}ms, forcing ready`, {
           speaking: syn.speaking,
           pending: syn.pending,
         })
-        window.clearInterval(intervalId)
+        clearInterval(intervalId)
         resolve()
       }
     }, checkIntervalMs)
