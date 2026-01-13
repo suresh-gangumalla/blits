@@ -170,6 +170,18 @@ const generateElementCode = function (
     renderCode.push(`elementConfigs[${counter}][Symbol.for('isSlot')] = true`)
   }
 
+  // Generate framework inspector data setup (dev mode only)
+  if (isDev === true) {
+    const componentType = templateObject[Symbol.for('componentType')] || 'Element'
+    renderCode.push(`
+      if (${elm} !== undefined && typeof ${elm}.setInspectorMetadata === 'function') {
+        ${elm}.setInspectorMetadata({
+          $componentType: '${componentType}'
+        })
+      }
+    `)
+  }
+
   Object.keys(templateObject).forEach((key) => {
     if (key === 'slot') {
       renderCode.push(`

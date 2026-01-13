@@ -82,8 +82,26 @@ export default {
       // emit 'public' hook
       emit(v, this.component[symbols.identifier], this.component)
       // update the built-in hasFocus state variable
-      if (v === 'focus') this.component[symbols.state].hasFocus = true
-      if (v === 'unfocus') this.component[symbols.state].hasFocus = false
+      if (v === 'focus') {
+        this.component[symbols.state].hasFocus = true
+        // Update inspector metadata on component's holder element
+        if (
+          this.component[symbols.holder] &&
+          typeof this.component[symbols.holder].setInspectorMetadata === 'function'
+        ) {
+          this.component[symbols.holder].setInspectorMetadata({ $hasFocus: true })
+        }
+      }
+      if (v === 'unfocus') {
+        this.component[symbols.state].hasFocus = false
+        // Update inspector metadata on component's holder element
+        if (
+          this.component[symbols.holder] &&
+          typeof this.component[symbols.holder].setInspectorMetadata === 'function'
+        ) {
+          this.component[symbols.holder].setInspectorMetadata({ $hasFocus: false })
+        }
+      }
     }
   },
 }

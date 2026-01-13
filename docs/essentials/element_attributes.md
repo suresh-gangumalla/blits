@@ -193,3 +193,18 @@ By default contents inside an Element (i.e. child Elements) will overflow the bo
 In order to contain / cut off the content inside an Element's `w` and `h`, you can add the `clipping="true"`-attribute. Setting `clipping` to `false` restores the default behaviour of content overflowing.
 
 Alternatively you can also use the `overflow`-attribute (and pass it `true` or `false`), which works similar to clipping just mapped inversly (i.e. `overflow="false"` ensures content that surpasses the parent dimensions is clipped-off).
+
+## Inspector Data
+
+The `inspector-data` attribute allows you to attach custom metadata to elements for debugging and automated testing. This data is visible in the Lightning inspector tool when enabled.
+
+```xml
+<Element inspector-data="{testId: 'button-primary', role: 'navigation'}" />
+```
+
+The framework automatically provides the following inspector metadata keys (prefixed with `$` to prevent naming collisions):
+- `$componentType` - The type of element/component ('Element', 'Text', 'Layout', or component name)
+- `$hasFocus` - Whether the component currently has focus (automatically updates)
+- `$isTransitioning` - Whether the element is currently animating/transitioning (automatically updates)
+
+> **Note:** The `inspector-data` attribute is only processed in development mode when the inspector is enabled. It's automatically filtered out in production builds for performance.
