@@ -52,12 +52,6 @@ const toggle = (v) => {
 
 const speak = (message, politeness = 'off', options = {}) => {
   if (active === false) return noopAnnouncement
-
-  // if cancelPrevious option is set, clear the queue and stop current speech
-  if (options.cancelPrevious === true) {
-    clear(true)
-  }
-
   return addToQueue(message, politeness, false, options)
 }
 
@@ -200,14 +194,9 @@ const stop = () => {
   }
 }
 
-const clear = (cancelPrevious = false) => {
+const clear = () => {
   // Clear debounce timer
   clearDebounceTimer()
-
-  // Cancel any active speech synthesis
-  if (cancelPrevious === true) {
-    speechSynthesis.cancel()
-  }
 
   // Resolve all pending items in queue
   while (queue.length > 0) {

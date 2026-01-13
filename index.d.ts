@@ -55,12 +55,6 @@ declare module '@lightningjs/blits' {
      */
     volume?: number,
     /**
-     * Whether to cancel previous announcements when adding this one
-     *
-     * @default false
-     */
-    cancelPrevious?: boolean,
-    /**
      * Whether to enable utterance keep-alive (prevents pausing on some platforms)
      *
      * @default undefined
