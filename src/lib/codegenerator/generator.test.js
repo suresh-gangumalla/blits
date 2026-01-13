@@ -4438,6 +4438,11 @@ test('Generate code for a template with verification of dynamic attributes', (as
     elementConfigs[0] = {}
 
     elms[0] = this.element({ parent: parent || 'root' }, inSlot === true ? slotComponent : component)
+    if (elms[0] !== undefined && typeof elms[0].setInspectorMetadata === 'function') {
+      elms[0].setInspectorMetadata({
+        $componentType: 'Element'
+      })
+    }
 
     propInComponent('eWidth', 'dynamic')
     elementConfigs[0]['w'] = component.eWidth
@@ -4532,6 +4537,11 @@ test('Generate code for a template with verification of reactive attributes', (a
     elementConfigs[0] = {}
 
     elms[0] = this.element({ parent: parent || 'root' }, inSlot === true ? slotComponent : component)
+    if (elms[0] !== undefined && typeof elms[0].setInspectorMetadata === 'function') {
+      elms[0].setInspectorMetadata({
+        $componentType: 'Element'
+      })
+    }
 
     propInComponent('eWidth', 'reactive')
     elementConfigs[0]['w'] = component.eWidth
@@ -4654,6 +4664,11 @@ test('Generate code for a template with attribute values verified against a nest
     elementConfigs[0] = {}
 
     elms[0] = this.element({ parent: parent || 'root' }, inSlot === true ? slotComponent : component)
+    if (elms[0] !== undefined && typeof elms[0].setInspectorMetadata === 'function') {
+      elms[0].setInspectorMetadata({
+        $componentType: 'Element'
+      })
+    }
 
     propInComponent('position.x', 'dynamic')
     elementConfigs[0]['x'] = component.position.x
@@ -4780,6 +4795,11 @@ test('Generate code for a template with verification of attributes with Math cal
     elementConfigs[0] = {}
 
     elms[0] = this.element({ parent: parent || 'root' }, inSlot === true ? slotComponent : component)
+    if (elms[0] !== undefined && typeof elms[0].setInspectorMetadata === 'function') {
+      elms[0].setInspectorMetadata({
+        $componentType: 'Element'
+      })
+    }
 
     propInComponent('position.x', 'dynamic')
     elementConfigs[0]['x'] = component.position.x * 100
