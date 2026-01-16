@@ -571,13 +571,8 @@ const Element = {
    */
   setInspectorMetadata(data) {
     // Early return if inspector not enabled (performance optimization)
-    if (inspectorEnabled === false) {
+    if (inspectorEnabled !== true) {
       return
-    }
-
-    if (inspectorEnabled === null) {
-      inspectorEnabled = Settings.get('inspector', false)
-      if (inspectorEnabled === false) return
     }
 
     // Early return if element is destroyed (props.props is null)
@@ -690,7 +685,7 @@ const Element = {
     }
 
     // Update inspector metadata when transition starts
-    if (inspectorEnabled !== false) {
+    if (inspectorEnabled === true) {
       this.setInspectorMetadata({ $isTransitioning: true })
     }
 
@@ -729,7 +724,7 @@ const Element = {
       // remove the prop from scheduled transitions
       delete this.scheduledTransitions[prop]
       // Update inspector metadata when transition ends
-      if (inspectorEnabled !== false) {
+      if (inspectorEnabled === true) {
         this.setInspectorMetadata({
           $isTransitioning: Object.keys(this.scheduledTransitions).length > 0,
         })
