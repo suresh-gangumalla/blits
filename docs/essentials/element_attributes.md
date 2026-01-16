@@ -196,10 +196,11 @@ Alternatively you can also use the `overflow`-attribute (and pass it `true` or `
 
 ## Inspector Data
 
-The `inspector-data` attribute allows you to attach custom metadata to elements for debugging and automated testing. This data is visible in the Lightning inspector tool when enabled.
+The `inspector-data` attribute allows you to attach custom metadata to elements and components for debugging and automated testing. This data is visible in the Lightning inspector tool when enabled.
 
 ```xml
 <Element inspector-data="{testId: 'button-primary', role: 'navigation'}" />
+<Button inspector-data="{testId: 'submit-button', role: 'action'}" />
 ```
 
 The framework automatically provides the following inspector metadata keys for **Components only** (prefixed with `$` to prevent naming collisions):
@@ -209,4 +210,4 @@ The framework automatically provides the following inspector metadata keys for *
 
 > **Note:** 
 > - The `inspector-data` attribute is only processed in development mode when the inspector is enabled. It's automatically filtered out in production builds for performance.
-> - Automatic framework metadata (`$componentType`, `$hasFocus`, `$isTransitioning`) is only set for Components,to keep the render path lightweight.
+> - Automatic framework metadata (`$componentType`, `$hasFocus`, `$isTransitioning`) is only set for Components, to keep the render path lightweight.
