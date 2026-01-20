@@ -511,9 +511,7 @@ export const navigate = async function () {
             await hooks.afterEach.call(
               this.parent,
               route, // to
-              view, // toComponent
-              previousRoute, // from
-              oldView // fromComponent
+              previousRoute // from
             )
           } catch (error) {
             Log.error('Error in "AfterEach" Hook', error)
@@ -526,9 +524,7 @@ export const navigate = async function () {
           await route.hooks.after.call(
             this.parent,
             route, // to
-            view, // toComponent
-            previousRoute, // from
-            oldView // fromComponent
+            previousRoute // from
           )
         } catch (error) {
           Log.error('Error or Rejected Promise in "After" Hook', error)
