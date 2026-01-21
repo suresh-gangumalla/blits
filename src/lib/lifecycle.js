@@ -18,6 +18,9 @@
 import { Log } from './log.js'
 import { emit, privateEmit } from './hooks.js'
 import symbols from './symbols.js'
+import Settings from '../settings.js'
+
+let inspectorEnabled = null
 
 /**
  * List of valid lifecycle states for a component.
@@ -82,10 +85,15 @@ export default {
       // emit 'public' hook
       emit(v, this.component[symbols.identifier], this.component)
       // update the built-in hasFocus state variable
+      if (v === 'focus' || v === 'unfocus') {
+        if (inspectorEnabled === null) {
+          inspectorEnabled = Settings.get('inspector', false)
+        }
+      }
       if (v === 'focus') {
         this.component[symbols.state].hasFocus = true
-        // Update inspector metadata on component's holder element
         if (
+          inspectorEnabled === true &&
           this.component[symbols.holder] &&
           typeof this.component[symbols.holder].setInspectorMetadata === 'function'
         ) {
@@ -94,8 +102,8 @@ export default {
       }
       if (v === 'unfocus') {
         this.component[symbols.state].hasFocus = false
-        // Update inspector metadata on component's holder element
         if (
+          inspectorEnabled === true &&
           this.component[symbols.holder] &&
           typeof this.component[symbols.holder].setInspectorMetadata === 'function'
         ) {
