@@ -151,6 +151,10 @@ const generateElementCode = function (
 
   renderCode.push(`elementConfigs[${counter}] = {}`)
 
+  if (counter === 0) {
+    renderCode.push(`elementConfigs[${counter}]['___wrapper'] = true `)
+  }
+
   if (options.forloop) {
     renderCode.push(`if(${elm} === undefined) {`)
   }

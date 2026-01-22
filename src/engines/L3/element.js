@@ -243,15 +243,21 @@ const propsTransformer = {
   },
   set w(v) {
     this.props['width'] = parsePercentage.call(this, v, 'width')
+    if (this.___wrapper === true && this.element.component[symbols.holder] !== undefined) {
+      this.element.component[symbols.holder].set('w', this.props['width'])
+    }
   },
   set width(v) {
-    this.props['width'] = parsePercentage.call(this, v, 'width')
+    this.w = v
   },
   set h(v) {
     this.props['height'] = parsePercentage.call(this, v, 'height')
+    if (this.___wrapper === true && this.element.component[symbols.holder] !== undefined) {
+      this.element.component[symbols.holder].set('h', this.props['height'])
+    }
   },
   set height(v) {
-    this.props['height'] = parsePercentage.call(this, v, 'height')
+    this.h = v
   },
   set x(v) {
     this.props['x'] = parsePercentage.call(this, v, 'width')
