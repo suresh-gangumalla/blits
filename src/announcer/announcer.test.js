@@ -171,9 +171,9 @@ test('Announcer stop interrupts processing', (assert) => {
   const announcement = announcer.speak('test message for interruption')
 
   announcement.then((status) => {
-    // Should resolve with 'interupted' when stop() is called
+    // Should resolve with 'interrupted' when stop() is called
     assert.ok(
-      status === 'interupted' || status === 'unavailable',
+      status === 'interrupted' || status === 'unavailable',
       'Stop interrupts (or unavailable if no speechSynthesis)'
     )
     assert.end()
