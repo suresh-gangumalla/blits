@@ -10,7 +10,7 @@ _22 jan 2026_
 - Added `this.$debounce`-method
 - Added automatic inspector data items (`$componentType`, `$hasFocus` and `$isTransitioning`)
 - Added functionality to auto size the holder node of a Component when the wrapper Element has dimensions
-
+- Bumped Lightning renderer to v2.20.4 with correct handling of failed textures
 
 ## v1.45.2
 
