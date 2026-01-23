@@ -58,6 +58,12 @@ declare module '@lightningjs/blits' {
      * @default 1
      */
     volume?: number,
+    /**
+     * Whether to enable utterance keep-alive (prevents pausing on some platforms)
+     *
+     * @default undefined
+     */
+    enableUtteranceKeepAlive?: boolean
   }
 
   export interface AnnouncerUtterance<T = any> extends Promise<T> {
@@ -326,23 +332,28 @@ declare module '@lightningjs/blits' {
     back(): boolean;
 
     /**
+     * Enable or disable RouterView history navigation on Back input
+     */
+    backNavigation: boolean;
+
+    /**
      * Get the current route read-only
     */
     readonly currentRoute: Route;
 
     /**
      * Get the list of all routes
-     */
+    */
     readonly routes: Route[];
 
     /**
      * Get navigating state
-     */
+    */
     readonly navigating: boolean;
 
     /**
      * Reactive router state
-     */
+    */
     state: {
       /**
        * Path of the current route
@@ -425,6 +436,26 @@ declare module '@lightningjs/blits' {
     * Clear a timeout
     */
     $clearTimeout: (id: ReturnType<typeof setTimeout>) => void
+
+    /**
+    * Debounce a function execution, preventing memory leaks and function re-allocation
+    * @param name - Unique identifier for this debounce instance (unique per component instance)
+    * @param callback - Function to debounce
+    * @param ms - Delay in milliseconds
+    * @param args - Arguments to pass to the callback
+    */
+    $debounce: (name: string, callback: (...args: any[]) => void, ms?: number, ...args: any[]) => ReturnType<typeof setTimeout>
+
+    /**
+    * Clear a specific debounce by name
+    * @param name - The name of the debounce to clear
+    */
+    $clearDebounce: (name: string) => void
+
+    /**
+    * Clear all debounces registered on the component (automatically called on component destroy)
+    */
+    $clearDebounces: () => void
 
     /**
     * Set an interval that is automatically cleaned upon component destroy
@@ -623,6 +654,7 @@ declare module '@lightningjs/blits' {
   export interface RouterHooks {
     init?: () => Promise<void> | void;
     beforeEach?: (to: Route, from: Route) => string | Route | Promise<string | Route> | void;
+    afterEach?: (to: Route, from: Route) => string | Route | Promise<string | Route> | void;
     error?: (err: string) => string | Route | Promise<string | Route> | void;
   }
 
@@ -646,6 +678,25 @@ declare module '@lightningjs/blits' {
      * ```
      */
     routes?: Route[]
+
+    /**
+     * Enable or disable RouterView history navigation on Back input
+     * 
+     * @default true
+     * 
+     * @remarks
+     * This is an app-wide setting that affects all RouterView instances in your application.
+     * The router state is global and shared across all router instances.
+     * 
+     * @example
+     * ```js
+     * router: {
+     *   backNavigation: false, // Disable automatic back navigation
+     *   routes: [...]
+     * }
+     * ```
+     */
+    backNavigation?: boolean
   }
 
   export type ApplicationConfig<P extends Props, S, M, C, W> = ComponentConfig<P, S, M, C, W> & (
@@ -746,6 +797,7 @@ declare module '@lightningjs/blits' {
 
   export interface RouteHooks {
     before?: (to: Route, from: Route) => string | Route | Promise<string | Route>;
+    after?: (to: Route, from: Route) => string | Route | Promise<string | Route>;
   }
 
   export type Route = {
