@@ -140,7 +140,7 @@ export default (code) => {
           if (currentPos >= computedObj.length - 1) break
 
           // Find the next function name (computed properties are `name() { ... }`)
-          const functionNameMatch = /^(\w+)\s*\([^)]*\)\s*/.exec(computedObj.substring(currentPos))
+          const functionNameMatch = /^(\w+)\s*\(\)\s*/.exec(computedObj.substring(currentPos))
           if (!functionNameMatch) break
 
           const funcName = functionNameMatch[1]
