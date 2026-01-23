@@ -1,5 +1,23 @@
 # Changelog
 
+## v1.46.0
+
+_22 jan 2026_
+
+- Improved Announcer on Comcast devices
+- Added new `afterEach` router hook
+- Added router option to dynamically disable `back`-key handling by the router
+- Added `this.$debounce`-method
+- Added automatic inspector data items (`$componentType`, `$hasFocus` and `$isTransitioning`)
+- Added functionality to auto size the holder node of a Component when the wrapper Element has dimensions
+- Bumped Lightning renderer to v2.20.4 with correct handling of failed textures
+
+## v1.45.2
+
+_13 jan 2026_
+
+- Updated renderer to v2.20.2
+
 ## v1.45.1
 
 _29 dec 2025_

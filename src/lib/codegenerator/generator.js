@@ -151,6 +151,10 @@ const generateElementCode = function (
 
   renderCode.push(`elementConfigs[${counter}] = {}`)
 
+  if (counter === 0) {
+    renderCode.push(`elementConfigs[${counter}]['___wrapper'] = true `)
+  }
+
   if (options.forloop) {
     renderCode.push(`if(${elm} === undefined) {`)
   }
@@ -283,9 +287,11 @@ const generateComponentCode = function (
 
   const children = templateObject.children
   delete templateObject.children
+  // Capture holder counter before generating element code (which may process children and increment counter)
+  const holderCounter = counter
   generateElementCode.call(this, templateObject, parent, { ...options, ...{ holder: true } })
 
-  parent = options.key ? `elms[${counter}][${options.key}]` : `elms[${counter}]`
+  parent = options.key ? `elms[${holderCounter}][${options.key}]` : `elms[${holderCounter}]`
 
   counter++
 
@@ -353,6 +359,21 @@ const generateComponentCode = function (
       parent = ${elm}[Symbol.for('children')][0]
     }
   `)
+
+  // For forloops, this code runs per instance, setting metadata for each component instance
+  if (isDev === true) {
+    const componentType = templateObject[Symbol.for('componentType')]
+    const holderElm = options.key
+      ? `elms[${holderCounter}][${options.key}]`
+      : `elms[${holderCounter}]`
+    renderCode.push(`
+      if (${holderElm} !== undefined && typeof ${holderElm}.setInspectorMetadata === 'function') {
+        ${holderElm}.setInspectorMetadata({
+          $componentType: '${componentType}'
+        })
+      }
+    `)
+  }
 
   this.cleanupCode.push(`components[${counter}] = null`)
 
