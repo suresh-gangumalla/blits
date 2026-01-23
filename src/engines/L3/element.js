@@ -210,18 +210,20 @@ const propsTransformer = {
     this.props['rotation'] = v * (Math.PI / 180)
   },
   set w(v) {
-    this.props['width'] = parsePercentage.call(this, v, 'width')
+    const parsed = parsePercentage.call(this, v, 'w')
+    this.props['w'] = parsed
     if (this.___wrapper === true && this.element.component[symbols.holder] !== undefined) {
-      this.element.component[symbols.holder].set('w', this.props['width'])
+      this.element.component[symbols.holder].set('w', parsed)
     }
   },
   set width(v) {
     this.w = v
   },
   set h(v) {
-    this.props['height'] = parsePercentage.call(this, v, 'height')
+    const parsed = parsePercentage.call(this, v, 'h')
+    this.props['h'] = parsed
     if (this.___wrapper === true && this.element.component[symbols.holder] !== undefined) {
-      this.element.component[symbols.holder].set('h', this.props['height'])
+      this.element.component[symbols.holder].set('h', parsed)
     }
   },
   set height(v) {

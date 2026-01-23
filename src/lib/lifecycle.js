@@ -91,7 +91,7 @@ export default {
         }
       }
       if (v === 'focus') {
-        this.component[symbols.state].hasFocus = true
+        this.component[symbols.state].$hasFocus = true
         if (
           inspectorEnabled === true &&
           this.component[symbols.holder] &&
@@ -101,7 +101,7 @@ export default {
         }
       }
       if (v === 'unfocus') {
-        this.component[symbols.state].hasFocus = false
+        this.component[symbols.state].$hasFocus = false
         if (
           inspectorEnabled === true &&
           this.component[symbols.holder] &&

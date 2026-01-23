@@ -509,8 +509,8 @@ export const navigate = async function () {
         }
       }
 
-      if (this.parent[symbols.routerHooks]) {
-        const hooks = this.parent[symbols.routerHooks]
+      if (this[symbols.parent][symbols.routerHooks]) {
+        const hooks = this[symbols.parent][symbols.routerHooks]
         if (hooks.afterEach) {
           try {
             await hooks.afterEach.call(
