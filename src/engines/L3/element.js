@@ -210,15 +210,19 @@ const propsTransformer = {
     this.props['rotation'] = v * (Math.PI / 180)
   },
   set w(v) {
-    if (v < 0) v = 0
-    this.props['w'] = parsePercentage.call(this, v, 'w')
+    this.props['width'] = parsePercentage.call(this, v, 'width')
+    if (this.___wrapper === true && this.element.component[symbols.holder] !== undefined) {
+      this.element.component[symbols.holder].set('w', this.props['width'])
+    }
   },
   set width(v) {
     this.w = v
   },
   set h(v) {
-    if (v < 0) v = 0
-    this.props['h'] = parsePercentage.call(this, v, 'h')
+    this.props['height'] = parsePercentage.call(this, v, 'height')
+    if (this.___wrapper === true && this.element.component[symbols.holder] !== undefined) {
+      this.element.component[symbols.holder].set('h', this.props['height'])
+    }
   },
   set height(v) {
     this.h = v
@@ -588,6 +592,39 @@ const Element = {
     }
   },
   /**
+   * Sets framework-provided inspector metadata
+   * Only sets if inspector is enabled and in dev mode
+   * @param {Object} data - Framework inspector metadata to merge
+   */
+  setInspectorMetadata(data) {
+    // Early return if inspector not enabled (performance optimization)
+    if (inspectorEnabled !== true) {
+      return
+    }
+
+    // Early return if element is destroyed (props.props is null)
+    if (this.props.props === undefined || this.props.props === null) {
+      return
+    }
+
+    // Initialize data object if it doesn't exist
+    if (this.props['data'] === undefined) {
+      this.props['data'] = {}
+    }
+    if (this.props.props['data'] === undefined) {
+      this.props.props['data'] = {}
+    }
+
+    // Merge framework data (with $ prefix to prevent collisions)
+    Object.assign(this.props['data'], data)
+    Object.assign(this.props.props['data'], data)
+
+    // Sync to renderer node so inspector can see it
+    if (this.node !== undefined && this.node !== null) {
+      this.node.data = { ...this.props.props['data'] }
+    }
+  },
+  /**
    * Set an individual property on the node
    *
    * @this {import('../../component').BlitsElement} this
@@ -674,6 +711,11 @@ const Element = {
       f,
     }
 
+    // Update inspector metadata when transition starts
+    if (inspectorEnabled === true) {
+      this.setInspectorMetadata({ $isTransitioning: true })
+    }
+
     if (transition.start !== undefined && typeof transition.start === 'function') {
       // fire transition start callback when animation really starts (depending on specified delay)
       f.once('animating', () => {
@@ -708,6 +750,12 @@ const Element = {
       }
       // remove the prop from scheduled transitions
       delete this.scheduledTransitions[prop]
+      // Update inspector metadata when transition ends
+      if (inspectorEnabled === true) {
+        this.setInspectorMetadata({
+          $isTransitioning: Object.keys(this.scheduledTransitions).length > 0,
+        })
+      }
     })
 
     // start animation

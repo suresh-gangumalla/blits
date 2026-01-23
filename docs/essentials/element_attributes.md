@@ -240,3 +240,20 @@ You can use a custom shader type by using the `shader` attribute. You can use [i
 
 
 
+## Inspector Data
+
+The `inspector-data` attribute allows you to attach custom metadata to elements and components for debugging and automated testing. This data is visible in the Lightning inspector tool when enabled.
+
+```xml
+<Element inspector-data="{testId: 'button-primary', role: 'navigation'}" />
+<Button inspector-data="{testId: 'submit-button', role: 'action'}" />
+```
+
+The framework automatically provides the following inspector metadata keys for **Components only** (prefixed with `$` to prevent naming collisions):
+- `$componentType` - The component name (e.g., 'MyComponent', 'Button', etc.)
+- `$hasFocus` - Whether the component currently has focus (automatically updates on focus/unfocus events)
+- `$isTransitioning` - Whether the element is currently animating/transitioning (automatically updates)
+
+> **Note:**
+> - The `inspector-data` attribute is only processed in development mode when the inspector is enabled. It's automatically filtered out in production builds for performance.
+> - Automatic framework metadata (`$componentType`, `$hasFocus`, `$isTransitioning`) is only set for Components, to keep the render path lightweight.

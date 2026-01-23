@@ -23,6 +23,9 @@ import util from 'node:util'
 import Settings from './settings.js'
 import { renderer, stage } from './launch.js'
 
+// Initialize logging
+initLog()
+
 // Setup renderer mock if needed
 if (renderer && !renderer.on) {
   renderer.on = () => {}
