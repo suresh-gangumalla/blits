@@ -364,7 +364,7 @@ const Component = (name = required('name'), config = required('config')) => {
           }
         }
 
-        let old = this[key]
+        let old = target[key]
 
         const eff = (force = false) => {
           const newValue = target[key]
