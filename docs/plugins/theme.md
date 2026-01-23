@@ -164,7 +164,7 @@ Blits.Component('MyComponent', {
 
 In case you have specified multiple themes, using the advanced configuration, it is possible to do real-time theme switching.
 
-Besides the `get()` method, the Theme plugin also exposes a `set()`-method, to change the currently active theme. The `this.$theme.set()`-method accepts the name of the theme as its first argument.
+Besides the `get()` method, the Theme plugin also exposes a `current()`-method, to change the currently active theme. The `this.$theme.current()`-method accepts the name of the theme as its first argument.
 
 ```js
 Blits.Component('MyComponent', {
@@ -178,10 +178,10 @@ Blits.Component('MyComponent', {
   `,
   input: {
     up() {
-      this.$theme.set('dark')
+      this.$theme.current('dark')
     },
     down() {
-      this.$theme.set('default')
+      this.$theme.current('default')
     }
   },
 })
