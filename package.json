@@ -68,7 +68,6 @@
     "husky": "^9.1.7",
     "jsdom": "24.0.0",
     "lint-staged": "^15.5.0",
-    "magic-string": "^0.30.21",
     "prettier": "^3.6.2",
     "sinon": "^21.0.0",
     "tap-diff": "^0.1.1",
@@ -76,7 +75,8 @@
     "tape": "^5.5.0"
   },
   "dependencies": {
-    "@lightningjs/renderer": "3.0.0-beta18"
+    "@lightningjs/renderer": "3.0.0-beta18",
+    "magic-string": "^0.30.21"
   },
   "repository": {
     "type": "git",

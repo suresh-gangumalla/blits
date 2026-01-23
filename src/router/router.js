@@ -30,6 +30,9 @@ import Settings from '../settings.js'
  * @typedef {import('../component.js').BlitsComponent} BlitsComponent - The element of the route
  * @typedef {import('../engines/L3/element.js').BlitsElement} BlitsElement - The element of the route
  *
+ * @typedef {BlitsComponent|BlitsComponentFactory} RouteView
+ * @typedef {RouteView & { default?: BlitsComponentFactory }} RouteViewWithOptionalDefault
+ *
  * @typedef {Object} Route
  * @property {string} path - The path of the route
  * @property {string} hash - The hash of the route
@@ -57,6 +60,7 @@ export const state = reactive(
     data: null,
     params: null,
     hash: '',
+    backNavigation: true,
   },
   Settings.get('reactivityMode'),
   true
@@ -335,6 +339,7 @@ export const navigate = async function () {
           return
         }
       }
+
       // add the previous route (technically still the current route at this point)
       // into the history stack when inHistory is true and we're not navigating back
       if (
@@ -354,6 +359,7 @@ export const navigate = async function () {
       /** @type {import('../engines/L3/element.js').BlitsElement} */
       let holder
 
+      /** @type {RouteViewWithOptionalDefault|undefined|null} */
       let view
       let focus
       // when navigating back let's see if we're navigating back to a route that was kept alive
@@ -476,15 +482,17 @@ export const navigate = async function () {
       }
 
       let shouldAnimate = false
+      // Declare oldView in broader scope so it can be used in hooks below
+      let oldView = null
 
       // apply out out transition on previous view if available, unless
       // we're reusing the prvious page component
       if (previousRoute !== undefined && reuse === false) {
         // only animate when there is a previous route
         shouldAnimate = true
-        const oldView = this[symbols.children].splice(1, 1).pop()
+        oldView = this[symbols.children].splice(1, 1).pop()
         if (oldView) {
-          removeView(previousRoute, oldView, route.transition.out, navigatingBack)
+          await removeView(previousRoute, oldView, route.transition.out, navigatingBack)
         }
       }
 
@@ -492,12 +500,39 @@ export const navigate = async function () {
       if (route.transition.in) {
         if (Array.isArray(route.transition.in)) {
           for (let i = 0; i < route.transition.in.length; i++) {
-            i === route.transition.length - 1
+            i === route.transition.in.length - 1
               ? await setOrAnimate(holder, route.transition.in[i], shouldAnimate)
               : setOrAnimate(holder, route.transition.in[i], shouldAnimate)
           }
         } else {
           await setOrAnimate(holder, route.transition.in, shouldAnimate)
+        }
+      }
+
+      if (this.parent[symbols.routerHooks]) {
+        const hooks = this.parent[symbols.routerHooks]
+        if (hooks.afterEach) {
+          try {
+            await hooks.afterEach.call(
+              this.parent,
+              route, // to
+              previousRoute // from
+            )
+          } catch (error) {
+            Log.error('Error in "AfterEach" Hook', error)
+          }
+        }
+      }
+
+      if (route.hooks.after) {
+        try {
+          await route.hooks.after.call(
+            this.parent,
+            route, // to
+            previousRoute // from
+          )
+        } catch (error) {
+          Log.error('Error or Rejected Promise in "After" Hook', error)
         }
       }
     } else {
