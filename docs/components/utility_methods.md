@@ -89,19 +89,19 @@ The `$focus`-method accepts an optional `event` parameter, which is of the type 
 
 This can be used to _bubble up_ input events (specified in the `input` key of the component configuration object) and helps to create a smooth experience, preventing a user to click multiple times.
 
-When a Component receives focus the `focus` lifecycle-hook is invoke. Additionally the built in state variable `hasFocus` is set from `false` to `true`.
+When a Component receives focus the `focus` lifecycle-hook is invoke. Additionally the built in state variable `$hasFocus` is set from `false` to `true`.
 
 #### Focus chain
 
-It's worth noting that the when a Component is _focused_ it's parents will _also_ be set to focused as part of the _focus chain_. Each parent will have it's `focus` lifecycle-hook invoked and the `hasFocus` state variable will be set to true.
+It's worth noting that the when a Component is _focused_ it's parents will _also_ be set to focused as part of the _focus chain_. Each parent will have it's `focus` lifecycle-hook invoked and the `$hasFocus` state variable will be set to true.
 
-When moving the focus to a different Component, all components that are in a focused state, but are not part of the new _focus chain_ to said Component will be put into `unfocus` state (i.e. `unfocus` lifecycle hook is invoked and `hasFocus` is set to `false`). For shared ancestors of the new Component to gain focus, the `focus` lifecycle hook is _not_ called again.
+When moving the focus to a different Component, all components that are in a focused state, but are not part of the new _focus chain_ to said Component will be put into `unfocus` state (i.e. `unfocus` lifecycle hook is invoked and `$hasFocus` is set to `false`). For shared ancestors of the new Component to gain focus, the `focus` lifecycle hook is _not_ called again.
 
 #### Refocus
 
 When the `$focus` method is called on a Component that is already is a focused state (either because it is the focused Component, or becasue it's an ancestor of the focused Component, and thus part of a focus chain) it is essentially being _refocused_. In this case the `focus`-lifecycle hook is invoked again, making sure that _focus_ functionality is executed.
 
-> Tip: a _refocus_ can be distinguished from a _fresh focus_, by checking the value of the  built-in `hasFocus` state variable. In the event of a refocus the `hasFocus` is already set to `true` when invoking the `focus`-hook. When it's a fresh focus the value is `false`.
+> Tip: a _refocus_ can be distinguished from a _fresh focus_, by checking the value of the  built-in `$hasFocus` state variable. In the event of a refocus the `$hasFocus` is already set to `true` when invoking the `focus`-hook. When it's a fresh focus the value is `false`.
 
 ### $input
 
@@ -424,6 +424,76 @@ export default Blits.Component('MyComponent', {
     enter() {
       // clear the interval
       this.$clearInterval(this.interval)
+    }
+  }
+})
+```
+
+## Debounce
+
+Debouncing is a technique to limit the rate at which a function executes. This is particularly useful when navigating through lists or handling rapid user input, where you want to execute a method only after the user has stopped the action for a specified delay.
+
+Similar to timeouts and intervals, debounced functions can cause memory leaks if not properly cleaned up. Blits provides built-in debounce methods that automatically handle cleanup when a component is destroyed.
+
+### $debounce
+
+The `this.$debounce()`-method creates a debounced function that delays execution until after a specified delay has passed since the last invocation. If the same name is debounced again before the delay completes, the previous debounce is cancelled and a new one is created.
+
+The first argument is a `name` (string) that uniquely identifies this debounce instance within the component. The second argument is the `callback` function to execute. The third argument is the `delay` in milliseconds. Additional arguments can be passed and will be forwarded to the callback function.
+
+The method returns a `debounce id`, which can be used to manually clear the debounce.
+
+**Key Features:**
+- **Name-based**: Each debounce is identified by a unique name (unique per component instance)
+- **Automatic replacement**: Calling `$debounce` with the same name replaces the previous debounce
+- **Memory efficient**: Only stores debounce IDs internally, function is captured in closure
+- **Automatic cleanup**: All debounces are cleared when component is destroyed
+
+### $clearDebounce
+
+The `this.$clearDebounce()`-method clears a specific debounce by its name. This prevents the debounced function from executing.
+
+### $clearDebounces
+
+The `this.$clearDebounces()`-method clears all debounces registered on the component in one go. This method is automatically called when destroying a Component, preventing memory leaks due to dangling debounce timers.
+
+```js
+export default Blits.Component('ListComponent', {
+  state() {
+    return {
+      items: [],
+      currentIndex: 0
+    }
+  },
+  input: {
+    down() {
+      // Debounce navigation - only load data after 300ms of no navigation
+      this.$debounce('navigate', () => {
+        this.loadCurrentItem()
+      }, 300)
+    },
+    up() {
+      // Different debounce for different operation
+      this.$debounce('update', () => {
+        this.updateUI()
+      }, 200)
+    }
+  },
+  methods: {
+    loadCurrentItem() {
+      // This will only execute after 300ms of no navigation
+      const item = this.items[this.currentIndex]
+      // ... load item data
+    },
+    updateUI() {
+      // This will only execute after 200ms of no update calls
+      // ... update UI
+    }
+  },
+  hooks: {
+    unfocus() {
+      // Optionally clear all debounces when component loses focus
+      this.$clearDebounces()
     }
   }
 })
