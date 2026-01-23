@@ -290,7 +290,7 @@ export const getTestComponent = () => {
       $componentId: 'TestComponent_1',
       ref: 'mainRef',
       [symbols.id]: 'TestComponent_1',
-      [symbols.state]: { hasFocus: false },
+      [symbols.state]: { $hasFocus: false },
       [symbols.state]: { prop1: 'value1', prop2: 'value2', prop3: [1, 2, 3] },
       [symbols.rendererEventListeners]: [],
       [symbols.children]: [
