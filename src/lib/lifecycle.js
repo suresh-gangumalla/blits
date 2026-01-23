@@ -84,7 +84,7 @@ export default {
       privateEmit(v, this.component[symbols.identifier], this.component)
       // emit 'public' hook
       emit(v, this.component[symbols.identifier], this.component)
-      // update the built-in hasFocus state variable
+      // update the built-in $hasFocus state variable
       if (v === 'focus' || v === 'unfocus') {
         if (inspectorEnabled === null) {
           inspectorEnabled = Settings.get('inspector', false)
