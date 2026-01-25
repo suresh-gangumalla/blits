@@ -7,6 +7,8 @@ import timeouts_intervals from './timeouts_intervals.js'
 import { registerHooks } from '../../lib/hooks.js'
 import lifecycle from '../../lib/lifecycle.js'
 
+initLog()
+
 test('Methods - Should contain all the defined methods', (assert) => {
   const component = Object.defineProperties({}, { ...methods })
 
