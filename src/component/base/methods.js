@@ -100,6 +100,8 @@ export default {
       // pass focus to the parent so we don't get lost in focus limbo
       if (this.$hasFocus === true) this[symbols.parent].$focus()
 
+      // @todo - is this really necessary?
+      // This cause an issue with auto sizing of parent (and required an extra eol check there)
       for (let key in this[symbols.state]) {
         if (Array.isArray(this[symbols.state][key])) {
           this[symbols.state][key] = []
