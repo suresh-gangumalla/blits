@@ -68,6 +68,7 @@ When an App has more than 1 theme, the _advanced configuration_ setup can be use
 - `themes` - an object with multiple theme definitions (required)
 - `base` - the name of the base theme in the `themes`-object, that other themes can inherit from (optional, defaults to `default`)
 - `current` - the name of current theme to be used (optional, defaults to `default`)
+- `variant` - the name of the variant theme to apply on top of the _current_ and _base_ theme. This can for example be a _high contrast_ theme, on top of a specific _partner_ theme
 
 ```js
 Blits.Plugin(theme, {
@@ -104,6 +105,12 @@ Blits.Plugin(theme, {
         h2: 124,
         body: 84
       }
+    },
+    highcontrast: {
+      color: {
+        primary: '#000',
+        secondary: 'red'
+      }
     }
   },
   base: 'base',
@@ -111,8 +118,8 @@ Blits.Plugin(theme, {
 })
 ```
 
-In the definition above we've specified 3 different themes: `base`, `dark` and `large`. The dark and large theme are not complete definitions,
-which means that they will inherit missing values from the base theme.
+In the definition above we've specified 4 different themes: `base`, `dark`, `large` and `highcontrast`. The dark and large theme are not complete definitions,
+which means that they will inherit missing values from the base theme. The high contrast theme is a so called _variant_ that we can apply on top, to specificy a few specific values on top of a main theme, without the need to redefine everything.
 
 ## TypeScript Support
 
@@ -166,6 +173,8 @@ In case you have specified multiple themes, using the advanced configuration, it
 
 Besides the `get()` method, the Theme plugin also exposes a `current()`-method, to change the currently active theme. The `this.$theme.current()`-method accepts the name of the theme as its first argument.
 
+In order to apply a _variant_ on top of the _current_ theme, you can use the `this.$theme.variant()`-method that accepts the name of the theme as its first argument.
+
 ```js
 Blits.Component('MyComponent', {
   template: `
@@ -182,6 +191,9 @@ Blits.Component('MyComponent', {
     },
     down() {
       this.$theme.current('default')
+    },
+    space() {
+      this.$theme.variant('highcontrast')
     }
   },
 })
