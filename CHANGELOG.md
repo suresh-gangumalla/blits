@@ -1,5 +1,13 @@
 # Changelog
 
+## v1.47.0
+
+_26 jan 2026_
+
+- Fixed issue with reactivity guard vite plugin failing for commented-out code
+- Fixed issue with autosizing of holder node by adding extra `eol` check
+- Added support for _variants_ to the Theme plugin
+
 ## v1.46.0
 
 _22 jan 2026_
