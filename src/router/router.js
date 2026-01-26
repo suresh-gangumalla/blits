@@ -482,15 +482,13 @@ export const navigate = async function () {
       }
 
       let shouldAnimate = false
-      // Declare oldView in broader scope so it can be used in hooks below
-      let oldView = null
 
       // apply out out transition on previous view if available, unless
       // we're reusing the prvious page component
       if (previousRoute !== undefined && reuse === false) {
         // only animate when there is a previous route
         shouldAnimate = true
-        oldView = this[symbols.children].splice(1, 1).pop()
+        const oldView = this[symbols.children].splice(1, 1).pop()
         if (oldView) {
           await removeView(previousRoute, oldView, route.transition.out, navigatingBack)
         }

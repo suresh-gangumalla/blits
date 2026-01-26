@@ -212,7 +212,11 @@ const propsTransformer = {
   set w(v) {
     const parsed = parsePercentage.call(this, v, 'w')
     this.props['w'] = parsed
-    if (this.___wrapper === true && this.element.component[symbols.holder] !== undefined) {
+    if (
+      this.___wrapper === true &&
+      this.element.component.eol !== true &&
+      this.element.component[symbols.holder] !== undefined
+    ) {
       this.element.component[symbols.holder].set('w', parsed)
     }
   },
@@ -222,7 +226,11 @@ const propsTransformer = {
   set h(v) {
     const parsed = parsePercentage.call(this, v, 'h')
     this.props['h'] = parsed
-    if (this.___wrapper === true && this.element.component[symbols.holder] !== undefined) {
+    if (
+      this.___wrapper === true &&
+      this.element.component.eol !== true &&
+      this.element.component[symbols.holder] !== undefined
+    ) {
       this.element.component[symbols.holder].set('h', parsed)
     }
   },
