@@ -503,10 +503,16 @@ const generateForLoopCode = function (templateObject, parent) {
 
       component !== null && component[Symbol.for('removeGlobalEffects')](effects[${forStartCounter}])
 
-      for(let i = 0; i < effects[${forStartCounter}].length; i++) {
-        const value = effects[${forStartCounter}][i]
-        const index = component[Symbol.for('effects')].indexOf(value)
-        if (index > -1) component[Symbol.for('effects')].splice(index, 1)
+     const effectsToRemove = new Set(effects[${forStartCounter}].slice(0))
+      if (effectsToRemove.size > 0) {
+        const componentEffects = component?.[Symbol.for('effects')] || []
+        let writeIndex = 0
+        for (let readIndex = 0; readIndex < componentEffects.length; readIndex++) {
+          if (!effectsToRemove.has(componentEffects[readIndex])) {
+            componentEffects[writeIndex++] = componentEffects[readIndex]
+          }
+        }
+        componentEffects.length = writeIndex
       }
 
       effects[${forStartCounter}].length = 0

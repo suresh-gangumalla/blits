@@ -3212,79 +3212,108 @@ test('Generate code for a template with a simple for-loop on an Element', (asser
     let slotChildCounter = 0
     let cmps = []
     elementConfigs[0] = {}
+
     elms[0] = this.element({ parent: parent || 'root' }, inSlot === true ? slotComponent : component)
+
     elms[0].populate(elementConfigs[0])
+
     if (inSlot === true) {
-        slotChildCounter -= 1
+      slotChildCounter -= 1
     }
 
     parent = elms[0]
+
     created[1] = []
     effects[1] = []
+
     let from1
     let to1
+
     forloops[1] = (collection = [], elms, created) => {
-        const rawCollection = getRaw(collection)
-        const keys = new Set()
-        let l = rawCollection.length
+      const rawCollection = getRaw(collection)
+      const keys = new Set()
+      let l = rawCollection.length
 
-        const range = {} || {}
-        from1 = range['from'] || 0
-        to1 = 'to' in range ? range['to'] : rawCollection.length
+      const range = {} || {}
+      from1 = range['from'] || 0
+      to1 = 'to' in range ? range['to'] : rawCollection.length
 
-        while (l--) {
-            const item = rawCollection[l]
-            if (l < to1 && l >= from1) {
-                keys.add('' + l)
-            }
+      while (l--) {
+        const item = rawCollection[l]
+
+        if (l < to1 && l >= from1) {
+          keys.add('' + l)
+        }
+      }
+
+      let i = created.length
+
+      while (i--) {
+        if (keys.has(created[i]) === false) {
+          const key = created[i]
+
+          elms[1][key] && elms[1][key].destroy()
+          elms[1][key] = null
+          delete elms[1][key]
+        }
+      }
+
+      created.length = 0
+      const length = rawCollection.length
+
+      component !== null && component[Symbol.for('removeGlobalEffects')](effects[1])
+
+      const effectsToRemove = new Set(effects[1].slice(0))
+      if (effectsToRemove.size > 0) {
+        const componentEffects = component?.[Symbol.for('effects')] || []
+        let writeIndex = 0
+        for (let readIndex = 0; readIndex < componentEffects.length; readIndex++) {
+          if (!effectsToRemove.has(componentEffects[readIndex])) {
+            componentEffects[writeIndex++] = componentEffects[readIndex]
+          }
+        }
+        componentEffects.length = writeIndex
+      }
+
+      effects[1].length = 0
+      for (let __index = 0; __index < length; __index++) {
+        if (__index < from1 || __index >= to1) continue
+        let scope = Object.create(component)
+        parent = elms[0]
+        scope['item'] = rawCollection[__index]
+
+        scope['undefined'] = __index
+
+        scope['key'] = '' + __index
+
+        created.push(scope.key)
+
+        parent = elms[0]
+
+        if (elms[1] === undefined) {
+          elms[1] = {}
         }
 
-        let i = created.length
-        while (i--) {
-            if (keys.has(created[i]) === false) {
-                const key = created[i]
-                elms[1][key] && elms[1][key].destroy()
-                elms[1][key] = null
-                delete elms[1][key]
-            }
+        elementConfigs[1] = {}
+        if (elms[1][scope.key] === undefined) {
+          elms[1][scope.key] = this.element(
+            { parent: parent || 'root' },
+            inSlot === true ? slotComponent : component
+          )
         }
-        created.length = 0
-        const length = rawCollection.length
-        component !== null && component[Symbol.for('removeGlobalEffects')](effects[1])
-        for(let i = 0; i < effects[1].length; i++) {
-          const value = effects[1][i]
-          const index = component[Symbol.for('effects')].indexOf(value)
-          if (index > -1) component[Symbol.for('effects')].splice(index, 1)
+        if (elms[1][scope.key].nodeId === undefined) {
+          elms[1][scope.key].populate(elementConfigs[1])
+
+          if (inSlot === true) {
+            slotChildCounter -= 1
+          }
         }
-        effects[1].length = 0
-        for (let __index = 0; __index < length; __index++) {
-            if (__index < from1 || __index >= to1) continue
-            let scope = Object.create(component)
-            parent = elms[0]
-            scope['item'] = rawCollection[__index]
-            scope['undefined'] = __index
-            scope['key'] = '' + __index
-            created.push(scope.key)
-            parent = elms[0]
-            if (elms[1] === undefined) {
-                elms[1] = {}
-            }
-            elementConfigs[1] = {}
-            if (elms[1][scope.key] === undefined) {
-                elms[1][scope.key] = this.element({ parent: parent || 'root' }, inSlot === true ? slotComponent : component)
-            }
-            if (elms[1][scope.key].nodeId === undefined) {
-                elms[1][scope.key].populate(elementConfigs[1])
-                if (inSlot === true) {
-                    slotChildCounter -= 1
-                }
-            }
-        }
-        return effects
+      }
+      return effects
     }
 
     let eff1 = () => {
-        forloops[1](component.items, elms, created[1])
+      forloops[1](component.items, elms, created[1])
     }
 
     component[Symbol.for('effects')].push(eff1)
@@ -3292,32 +3321,31 @@ test('Generate code for a template with a simple for-loop on an Element', (asser
     effect(eff1, ['items',])
 
     return {
-        elms,
-        cleanup: () => {
-            rootComponent = null
-            propData = null
-            slotComponent = null
-            parent = null
+      elms,
+      cleanup: () => {
+        rootComponent = null
+        propData = null
+        slotComponent = null
+        parent = null
 
-            created[1].length = 0
-            eff1 = null
-            // call loop with empty array
-            forloops[1]([], elms, created[1])
-            forloops[1] = null
+        created[1].length = 0
 
-            component = null
-            cmps.length = 0
-            elms.length = 0
-            components.length = 0
-            elementConfigs.length = 0
-            forloops.length = 0
-            props.length = 0
-            skips.length = 0
-        }
+        eff1 = null
+        // call loop with empty array
+        forloops[1]([], elms, created[1])
+        forloops[1] = null
+
+        component = null
+        cmps.length = 0
+        elms.length = 0
+        components.length = 0
+        elementConfigs.length = 0
+        forloops.length = 0
+        props.length = 0
+        skips.length = 0
+      }
     }
-}
-
-  `
+}`
 
   const actual = generator.call(scope, templateObject)
 
@@ -3370,82 +3398,88 @@ test('Generate code for a template with a simple for-loop on an Element, Using d
     elms[0] = this.element({ parent: parent || 'root' }, inSlot === true ? slotComponent : component)
     elms[0].populate(elementConfigs[0])
     if (inSlot === true) {
-        slotChildCounter -= 1
+      slotChildCounter -= 1
     }
-
     parent = elms[0]
     created[1] = []
     effects[1] = []
     let from1
     let to1
     forloops[1] = (collection = [], elms, created) => {
-        const rawCollection = getRaw(collection)
-        const keys = new Set()
-        let l = rawCollection.length
+      const rawCollection = getRaw(collection)
+      const keys = new Set()
+      let l = rawCollection.length
 
-        const range = {} || {}
-        from1 = range['from'] || 0
-        to1 = 'to' in range ? range['to'] : rawCollection.length
+      const range = {} || {}
+      from1 = range['from'] || 0
+      to1 = 'to' in range ? range['to'] : rawCollection.length
 
-        while (l--) {
-            const item = rawCollection[l]
-            if (l < to1 && l >= from1) {
-                keys.add('' + l)
-            }
+      while (l--) {
+        const item = rawCollection[l]
+        if (l < to1 && l >= from1) {
+          keys.add('' + l)
         }
+      }
 
-        let i = created.length
-        while (i--) {
-            if (keys.has(created[i]) === false) {
-                const key = created[i]
-                elms[1][key] && elms[1][key].destroy()
-                elms[1][key] = null
-                delete elms[1][key]
-            }
+      let i = created.length
+      while (i--) {
+        if (keys.has(created[i]) === false) {
+          const key = created[i]
+          elms[1][key] && elms[1][key].destroy()
+          elms[1][key] = null
+          delete elms[1][key]
         }
-        created.length = 0
-        const length = rawCollection.length
-        component !== null && component[Symbol.for('removeGlobalEffects')](effects[1])
-        for(let i = 0; i < effects[1].length; i++) {
-          const value = effects[1][i]
-          const index = component[Symbol.for('effects')].indexOf(value)
-          if (index > -1) component[Symbol.for('effects')].splice(index, 1)
+      }
+      created.length = 0
+      const length = rawCollection.length
+      component !== null && component[Symbol.for('removeGlobalEffects')](effects[1])
+      const effectsToRemove = new Set(effects[1].slice(0))
+      if (effectsToRemove.size > 0) {
+        const componentEffects = component?.[Symbol.for('effects')] || []
+        let writeIndex = 0
+        for (let readIndex = 0; readIndex < componentEffects.length; readIndex++) {
+          if (!effectsToRemove.has(componentEffects[readIndex])) {
+            componentEffects[writeIndex++] = componentEffects[readIndex]
+          }
         }
-        effects[1].length = 0
-        for (let __index = 0; __index < length; __index++) {
-            if (__index < from1 || __index >= to1) continue
-            let scope = Object.create(component)
-            parent = elms[0]
-            scope['item'] = rawCollection[__index]
-            scope['undefined'] = __index
-            scope['key'] = '' + __index
-            created.push(scope.key)
-            parent = elms[0]
-            if (elms[1] === undefined) {
-                elms[1] = {}
-            }
-            elementConfigs[1] = {}
-            if (elms[1][scope.key] === undefined) {
-                elms[1][scope.key] = this.element({ parent: parent || 'root' }, inSlot === true ? slotComponent : component)
-            }
-            if (elms[1][scope.key].nodeId === undefined) {
-                elms[1][scope.key].populate(elementConfigs[1])
-                if (inSlot === true) {
-                    slotChildCounter -= 1
-                }
-            }
+        componentEffects.length = writeIndex
+      }
+      effects[1].length = 0
+      for (let __index = 0; __index < length; __index++) {
+        if (__index < from1 || __index >= to1) continue
+        let scope = Object.create(component)
+        parent = elms[0]
+        scope['item'] = rawCollection[__index]
+        scope['undefined'] = __index
+        scope['key'] = '' + __index
+        created.push(scope.key)
+        parent = elms[0]
+        if (elms[1] === undefined) {
+          elms[1] = {}
         }
-        return effects
+        elementConfigs[1] = {}
+        if (elms[1][scope.key] === undefined) {
+          elms[1][scope.key] = this.element(
+            { parent: parent || 'root' },
+            inSlot === true ? slotComponent : component
+          )
+        }
+        if (elms[1][scope.key].nodeId === undefined) {
+          elms[1][scope.key].populate(elementConfigs[1])
+          if (inSlot === true) {
+            slotChildCounter -= 1
+          }
+        }
+      }
+      return effects
     }
 
     let eff1 = () => {
-        forloops[1](component.$appState.list, elms, created[1])
+      forloops[1](component.$appState.list, elms, created[1])
     }
 
     component[Symbol.for('effects')].push(eff1)
-
     effect(eff1, ['list',])
-
     return {
       elms,
       cleanup: () => {
@@ -3473,8 +3507,6 @@ test('Generate code for a template with a simple for-loop on an Element, Using d
   }`
 
   const actual = generator.call(scope, templateObject)
-
-  console.log(actual.render.toString())
 
   assert.equal(
     normalize(actual.render.toString()),
@@ -3525,82 +3557,83 @@ test('Generate code for a template with a simple for-loop on an Element, Using d
     elms[0] = this.element({ parent: parent || 'root' }, inSlot === true ? slotComponent : component)
     elms[0].populate(elementConfigs[0])
     if (inSlot === true) {
-        slotChildCounter -= 1
+      slotChildCounter -= 1
     }
-
     parent = elms[0]
     created[1] = []
     effects[1] = []
     let from1
     let to1
     forloops[1] = (collection = [], elms, created) => {
-        const rawCollection = getRaw(collection)
-        const keys = new Set()
-        let l = rawCollection.length
-
-        const range = {} || {}
-        from1 = range['from'] || 0
-        to1 = 'to' in range ? range['to'] : rawCollection.length
-
-        while (l--) {
-            const item = rawCollection[l]
-            if (l < to1 && l >= from1) {
-                keys.add('' + l)
-            }
+      const rawCollection = getRaw(collection)
+      const keys = new Set()
+      let l = rawCollection.length
+      const range = {} || {}
+      from1 = range['from'] || 0
+      to1 = 'to' in range ? range['to'] : rawCollection.length
+      while (l--) {
+        const item = rawCollection[l]
+        if (l < to1 && l >= from1) {
+          keys.add('' + l)
         }
-
-        let i = created.length
-        while (i--) {
-            if (keys.has(created[i]) === false) {
-                const key = created[i]
-                elms[1][key] && elms[1][key].destroy()
-                elms[1][key] = null
-                delete elms[1][key]
-            }
+      }
+      let i = created.length
+      while (i--) {
+        if (keys.has(created[i]) === false) {
+          const key = created[i]
+          elms[1][key] && elms[1][key].destroy()
+          elms[1][key] = null
+          delete elms[1][key]
         }
-        created.length = 0
-        const length = rawCollection.length
-        component !== null && component[Symbol.for('removeGlobalEffects')](effects[1])
-        for(let i = 0; i < effects[1].length; i++) {
-          const value = effects[1][i]
-          const index = component[Symbol.for('effects')].indexOf(value)
-          if (index > -1) component[Symbol.for('effects')].splice(index, 1)
+      }
+      created.length = 0
+      const length = rawCollection.length
+      component !== null && component[Symbol.for('removeGlobalEffects')](effects[1])
+      const effectsToRemove = new Set(effects[1].slice(0))
+      if (effectsToRemove.size > 0) {
+        const componentEffects = component?.[Symbol.for('effects')] || []
+        let writeIndex = 0
+        for (let readIndex = 0; readIndex < componentEffects.length; readIndex++) {
+          if (!effectsToRemove.has(componentEffects[readIndex])) {
+            componentEffects[writeIndex++] = componentEffects[readIndex]
+          }
         }
-        effects[1].length = 0
-        for (let __index = 0; __index < length; __index++) {
-            if (__index < from1 || __index >= to1) continue
-            let scope = Object.create(component)
-            parent = elms[0]
-            scope['item'] = rawCollection[__index]
-            scope['undefined'] = __index
-            scope['key'] = '' + __index
-            created.push(scope.key)
-            parent = elms[0]
-            if (elms[1] === undefined) {
-                elms[1] = {}
-            }
-            elementConfigs[1] = {}
-            if (elms[1][scope.key] === undefined) {
-                elms[1][scope.key] = this.element({ parent: parent || 'root' }, inSlot === true ? slotComponent : component)
-            }
-            if (elms[1][scope.key].nodeId === undefined) {
-                elms[1][scope.key].populate(elementConfigs[1])
-                if (inSlot === true) {
-                    slotChildCounter -= 1
-                }
-            }
+        componentEffects.length = writeIndex
+      }
+      effects[1].length = 0
+      for (let __index = 0; __index < length; __index++) {
+        if (__index < from1 || __index >= to1) continue
+        let scope = Object.create(component)
+        parent = elms[0]
+        scope['item'] = rawCollection[__index]
+        scope['undefined'] = __index
+        scope['key'] = '' + __index
+        created.push(scope.key)
+        parent = elms[0]
+        if (elms[1] === undefined) {
+          elms[1] = {}
         }
-        return effects
+        elementConfigs[1] = {}
+        if (elms[1][scope.key] === undefined) {
+          elms[1][scope.key] = this.element(
+            { parent: parent || 'root' },
+            inSlot === true ? slotComponent : component
+          )
+        }
+        if (elms[1][scope.key].nodeId === undefined) {
+          elms[1][scope.key].populate(elementConfigs[1])
+          if (inSlot === true) {
+            slotChildCounter -= 1
+          }
+        }
+      }
+      return effects
     }
-
     let eff1 = () => {
-        forloops[1](component.content.data, elms, created[1])
+      forloops[1](component.content.data, elms, created[1])
     }
-
     component[Symbol.for('effects')].push(eff1)
-
     effect(eff1, ['data',])
-
     return {
       elms,
       cleanup: () => {
@@ -3608,13 +3641,11 @@ test('Generate code for a template with a simple for-loop on an Element, Using d
         propData = null
         slotComponent = null
         parent = null
-
         created[1].length = 0
         eff1 = null
         // call loop with empty array
         forloops[1]([], elms, created[1])
         forloops[1] = null
-
         component = null
         cmps.length = 0
         elms.length = 0
@@ -3628,6 +3659,7 @@ test('Generate code for a template with a simple for-loop on an Element, Using d
   }`
 
   const actual = generator.call(scope, templateObject)
+  console.log(actual.render.toString())
 
   assert.equal(
     normalize(actual.render.toString()),
@@ -3675,79 +3707,110 @@ test('Generate code for a template with a simple for-loop on an Element with a c
     let slotChildCounter = 0
     let cmps = []
     elementConfigs[0] = {}
+
     elms[0] = this.element({ parent: parent || 'root' }, inSlot === true ? slotComponent : component)
+
     elms[0].populate(elementConfigs[0])
+
     if (inSlot === true) {
-        slotChildCounter -= 1
+      slotChildCounter -= 1
     }
 
     parent = elms[0]
+
     created[1] = []
     effects[1] = []
+
     let from1
     let to1
+
     forloops[1] = (collection = [], elms, created) => {
-        const rawCollection = getRaw(collection)
-        const keys = new Set()
-        let l = rawCollection.length
+      const rawCollection = getRaw(collection)
+      const keys = new Set()
+      let l = rawCollection.length
 
-        const range = {} || {}
-        from1 = range['from'] || 0
-        to1 = 'to' in range ? range['to'] : rawCollection.length
-        while (l--) {
-            const item = rawCollection[l]
-            const customIndex = l
-            if (l < to1 && l >= from1) {
-                keys.add('' + l)
-            }
+      const range = {} || {}
+      from1 = range['from'] || 0
+      to1 = 'to' in range ? range['to'] : rawCollection.length
+
+      while (l--) {
+        const item = rawCollection[l]
+
+        const customIndex = l
+
+        if (l < to1 && l >= from1) {
+          keys.add('' + l)
+        }
+      }
+
+      let i = created.length
+
+      while (i--) {
+        if (keys.has(created[i]) === false) {
+          const key = created[i]
+
+          elms[1][key] && elms[1][key].destroy()
+          elms[1][key] = null
+          delete elms[1][key]
+        }
+      }
+
+      created.length = 0
+      const length = rawCollection.length
+
+      component !== null && component[Symbol.for('removeGlobalEffects')](effects[1])
+
+      const effectsToRemove = new Set(effects[1].slice(0))
+      if (effectsToRemove.size > 0) {
+        const componentEffects = component?.[Symbol.for('effects')] || []
+        let writeIndex = 0
+        for (let readIndex = 0; readIndex < componentEffects.length; readIndex++) {
+          if (!effectsToRemove.has(componentEffects[readIndex])) {
+            componentEffects[writeIndex++] = componentEffects[readIndex]
+          }
+        }
+        componentEffects.length = writeIndex
+      }
+
+      effects[1].length = 0
+      for (let __index = 0; __index < length; __index++) {
+        if (__index < from1 || __index >= to1) continue
+        let scope = Object.create(component)
+        parent = elms[0]
+        scope['item'] = rawCollection[__index]
+
+        scope['customIndex'] = __index
+
+        scope['key'] = '' + __index
+
+        created.push(scope.key)
+
+        parent = elms[0]
+
+        if (elms[1] === undefined) {
+          elms[1] = {}
         }
 
-        let i = created.length
-        while (i--) {
-            if (keys.has(created[i]) === false) {
-                const key = created[i]
-                elms[1][key] && elms[1][key].destroy()
-                elms[1][key] = null
-                delete elms[1][key]
-            }
+        elementConfigs[1] = {}
+        if (elms[1][scope.key] === undefined) {
+          elms[1][scope.key] = this.element(
+            { parent: parent || 'root' },
+            inSlot === true ? slotComponent : component
+          )
         }
-        created.length = 0
-        const length = rawCollection.length
-        component !== null && component[Symbol.for('removeGlobalEffects')](effects[1])
-        for(let i = 0; i < effects[1].length; i++) {
-          const value = effects[1][i]
-          const index = component[Symbol.for('effects')].indexOf(value)
-          if (index > -1) component[Symbol.for('effects')].splice(index, 1)
+        if (elms[1][scope.key].nodeId === undefined) {
+          elms[1][scope.key].populate(elementConfigs[1])
+
+          if (inSlot === true) {
+            slotChildCounter -= 1
+          }
         }
-        effects[1].length = 0
-        for (let __index = 0; __index < length; __index++) {
-            if (__index < from1 || __index >= to1) continue
-            let scope = Object.create(component)
-            parent = elms[0]
-            scope['item'] = rawCollection[__index]
-            scope['customIndex'] = __index
-            scope['key'] = '' + __index
-            created.push(scope.key)
-            parent = elms[0]
-            if (elms[1] === undefined) {
-                elms[1] = {}
-            }
-            elementConfigs[1] = {}
-            if (elms[1][scope.key] === undefined) {
-                elms[1][scope.key] = this.element({ parent: parent || 'root' }, inSlot === true ? slotComponent : component)
-            }
-            if (elms[1][scope.key].nodeId === undefined) {
-                elms[1][scope.key].populate(elementConfigs[1])
-                if (inSlot === true) {
-                    slotChildCounter -= 1
-                }
-            }
-        }
-        return effects
+      }
+      return effects
     }
 
     let eff1 = () => {
-        forloops[1](component.items, elms, created[1])
+      forloops[1](component.items, elms, created[1])
     }
 
     component[Symbol.for('effects')].push(eff1)
@@ -3763,6 +3826,7 @@ test('Generate code for a template with a simple for-loop on an Element with a c
         parent = null
 
         created[1].length = 0
+
         eff1 = null
         // call loop with empty array
         forloops[1]([], elms, created[1])
@@ -3829,78 +3893,108 @@ test('Generate code for a template with a simple for-loop on an Element with a k
     let slotChildCounter = 0
     let cmps = []
     elementConfigs[0] = {}
+
     elms[0] = this.element({ parent: parent || 'root' }, inSlot === true ? slotComponent : component)
+
     elms[0].populate(elementConfigs[0])
+
     if (inSlot === true) {
-        slotChildCounter -= 1
+      slotChildCounter -= 1
     }
 
     parent = elms[0]
+
     created[1] = []
     effects[1] = []
+
     let from1
     let to1
+
     forloops[1] = (collection = [], elms, created) => {
-        const rawCollection = getRaw(collection)
-        const keys = new Set()
-        let l = rawCollection.length
+      const rawCollection = getRaw(collection)
+      const keys = new Set()
+      let l = rawCollection.length
 
-        const range = {} || {}
-        from1 = range['from'] || 0
-        to1 = 'to' in range ? range['to'] : rawCollection.length
-        while (l--) {
-            const item = rawCollection[l]
-            if (l < to1 && l >= from1) {
-                keys.add('' + item.id)
-            }
+      const range = {} || {}
+      from1 = range['from'] || 0
+      to1 = 'to' in range ? range['to'] : rawCollection.length
+
+      while (l--) {
+        const item = rawCollection[l]
+
+        if (l < to1 && l >= from1) {
+          keys.add('' + item.id)
+        }
+      }
+
+      let i = created.length
+
+      while (i--) {
+        if (keys.has(created[i]) === false) {
+          const key = created[i]
+
+          elms[1][key] && elms[1][key].destroy()
+          elms[1][key] = null
+          delete elms[1][key]
+        }
+      }
+
+      created.length = 0
+      const length = rawCollection.length
+
+      component !== null && component[Symbol.for('removeGlobalEffects')](effects[1])
+
+      const effectsToRemove = new Set(effects[1].slice(0))
+      if (effectsToRemove.size > 0) {
+        const componentEffects = component?.[Symbol.for('effects')] || []
+        let writeIndex = 0
+        for (let readIndex = 0; readIndex < componentEffects.length; readIndex++) {
+          if (!effectsToRemove.has(componentEffects[readIndex])) {
+            componentEffects[writeIndex++] = componentEffects[readIndex]
+          }
+        }
+        componentEffects.length = writeIndex
+      }
+
+      effects[1].length = 0
+      for (let __index = 0; __index < length; __index++) {
+        if (__index < from1 || __index >= to1) continue
+        let scope = Object.create(component)
+        parent = elms[0]
+        scope['item'] = rawCollection[__index]
+
+        scope['undefined'] = __index
+
+        scope['key'] = '' + scope.item.id
+
+        created.push(scope.key)
+
+        parent = elms[0]
+
+        if (elms[1] === undefined) {
+          elms[1] = {}
         }
 
-        let i = created.length
-        while (i--) {
-            if (keys.has(created[i]) === false) {
-                const key = created[i]
-                elms[1][key] && elms[1][key].destroy()
-                elms[1][key] = null
-                delete elms[1][key]
-            }
+        elementConfigs[1] = {}
+        if (elms[1][scope.key] === undefined) {
+          elms[1][scope.key] = this.element(
+            { parent: parent || 'root' },
+            inSlot === true ? slotComponent : component
+          )
         }
-        created.length = 0
-        const length = rawCollection.length
-        component !== null && component[Symbol.for('removeGlobalEffects')](effects[1])
-        for(let i = 0; i < effects[1].length; i++) {
-          const value = effects[1][i]
-          const index = component[Symbol.for('effects')].indexOf(value)
-          if (index > -1) component[Symbol.for('effects')].splice(index, 1)
+        if (elms[1][scope.key].nodeId === undefined) {
+          elms[1][scope.key].populate(elementConfigs[1])
+
+          if (inSlot === true) {
+            slotChildCounter -= 1
+          }
         }
-        effects[1].length = 0
-        for (let __index = 0; __index < length; __index++) {
-            if (__index < from1 || __index >= to1) continue
-            let scope = Object.create(component)
-            parent = elms[0]
-            scope['item'] = rawCollection[__index]
-            scope['undefined'] = __index
-            scope['key'] = '' + scope.item.id
-            created.push(scope.key)
-            parent = elms[0]
-            if (elms[1] === undefined) {
-                elms[1] = {}
-            }
-            elementConfigs[1] = {}
-            if (elms[1][scope.key] === undefined) {
-                elms[1][scope.key] = this.element({ parent: parent || 'root' }, inSlot === true ? slotComponent : component)
-            }
-            if (elms[1][scope.key].nodeId === undefined) {
-                elms[1][scope.key].populate(elementConfigs[1])
-                if (inSlot === true) {
-                    slotChildCounter -= 1
-                }
-            }
-        }
-        return effects
+      }
+      return effects
     }
 
     let eff1 = () => {
-        forloops[1](component.items, elms, created[1])
+      forloops[1](component.items, elms, created[1])
     }
 
     component[Symbol.for('effects')].push(eff1)
@@ -3916,6 +4010,7 @@ test('Generate code for a template with a simple for-loop on an Element with a k
         parent = null
 
         created[1].length = 0
+
         eff1 = null
         // call loop with empty array
         forloops[1]([], elms, created[1])
@@ -3931,7 +4026,8 @@ test('Generate code for a template with a simple for-loop on an Element with a k
         skips.length = 0
       }
     }
-  }`
+  }
+`
 
   const actual = generator.call(scope, templateObject)
 
@@ -3982,115 +4078,162 @@ test('Generate code for a template with a simple for-loop on a Component with a 
     let slotChildCounter = 0
     let cmps = []
     elementConfigs[0] = {}
+
     elms[0] = this.element({ parent: parent || 'root' }, inSlot === true ? slotComponent : component)
+
     elms[0].populate(elementConfigs[0])
+
     if (inSlot === true) {
-        slotChildCounter -= 1
+      slotChildCounter -= 1
     }
 
     parent = elms[0]
+
     created[1] = []
     effects[1] = []
+
     let from1
     let to1
+
     forloops[1] = (collection = [], elms, created) => {
-        const rawCollection = getRaw(collection)
-        const keys = new Set()
-        let l = rawCollection.length
+      const rawCollection = getRaw(collection)
+      const keys = new Set()
+      let l = rawCollection.length
 
-        const range = {} || {}
-        from1 = range['from'] || 0
-        to1 = 'to' in range ? range['to'] : rawCollection.length
+      const range = {} || {}
+      from1 = range['from'] || 0
+      to1 = 'to' in range ? range['to'] : rawCollection.length
 
-        while (l--) {
-            const item = rawCollection[l]
-            const myIndex = l
-            if (l < to1 && l >= from1) {
-                keys.add('' + item.id)
-            }
+      while (l--) {
+        const item = rawCollection[l]
+
+        const myIndex = l
+
+        if (l < to1 && l >= from1) {
+          keys.add('' + item.id)
+        }
+      }
+
+      let i = created.length
+
+      while (i--) {
+        if (keys.has(created[i]) === false) {
+          const key = created[i]
+
+          elms[1][key] && elms[1][key].destroy()
+          elms[1][key] = null
+          delete elms[1][key]
+
+          elms[2][key] && elms[2][key].destroy()
+          elms[2][key] = null
+          delete elms[2][key]
+        }
+      }
+
+      created.length = 0
+      const length = rawCollection.length
+
+      component !== null && component[Symbol.for('removeGlobalEffects')](effects[1])
+
+      const effectsToRemove = new Set(effects[1].slice(0))
+      if (effectsToRemove.size > 0) {
+        const componentEffects = component?.[Symbol.for('effects')] || []
+        let writeIndex = 0
+        for (let readIndex = 0; readIndex < componentEffects.length; readIndex++) {
+          if (!effectsToRemove.has(componentEffects[readIndex])) {
+            componentEffects[writeIndex++] = componentEffects[readIndex]
+          }
+        }
+        componentEffects.length = writeIndex
+      }
+
+      effects[1].length = 0
+      for (let __index = 0; __index < length; __index++) {
+        if (__index < from1 || __index >= to1) continue
+        let scope = Object.create(component)
+        parent = elms[0]
+        scope['item'] = rawCollection[__index]
+
+        scope['myIndex'] = __index
+
+        scope['key'] = '' + scope.item.id
+
+        created.push(scope.key)
+
+        cmps[1] = (context.components && context.components['ListItem']) || components['ListItem']
+
+        if (elms[1] === undefined) {
+          elms[1] = {}
         }
 
-        let i = created.length
-        while (i--) {
-            if (keys.has(created[i]) === false) {
-                const key = created[i]
-                elms[1][key] && elms[1][key].destroy()
-                elms[1][key] = null
-                delete elms[1][key]
-                elms[2][key] && elms[2][key].destroy()
-                elms[2][key] = null
-                delete elms[2][key]
-            }
+        elementConfigs[1] = {}
+        if (elms[1][scope.key] === undefined) {
+          elms[1][scope.key] = this.element(
+            { parent: parent || 'root' },
+            inSlot === true ? slotComponent : component
+          )
         }
-        created.length = 0
-        const length = rawCollection.length
-        component !== null && component[Symbol.for('removeGlobalEffects')](effects[1])
-        for(let i = 0; i < effects[1].length; i++) {
-          const value = effects[1][i]
-          const index = component[Symbol.for('effects')].indexOf(value)
-          if (index > -1) component[Symbol.for('effects')].splice(index, 1)
+
+        skips[1] = []
+        if (typeof cmps[1] !== 'undefined') {
+          for (let key in cmps[1][Symbol.for('config')].props) {
+            delete elementConfigs[1][cmps[1][Symbol.for('config')].props[key]]
+            skips[1].push(cmps[1][Symbol.for('config')].props[key])
+          }
         }
-        effects[1].length = 0
-        for (let __index = 0; __index < length; __index++) {
-            if (__index < from1 || __index >= to1) continue
-            let scope = Object.create(component)
-            parent = elms[0]
-            scope['item'] = rawCollection[__index]
-            scope['myIndex'] = __index
-            scope['key'] = '' + scope.item.id
-            created.push(scope.key)
-            cmps[1] = (context.components && context.components['ListItem']) || components['ListItem']
-            if (elms[1] === undefined) {
-                elms[1] = {}
-            }
-            elementConfigs[1] = {}
-            if (elms[1][scope.key] === undefined) {
-                elms[1][scope.key] = this.element({ parent: parent || 'root' }, inSlot === true ? slotComponent : component)
-            }
-            skips[1] = []
-            if (typeof cmps[1] !== 'undefined') {
-                for (let key in cmps[1][Symbol.for('config')].props) {
-                    delete elementConfigs[1][cmps[1][Symbol.for('config')].props[key]]
-                    skips[1].push(cmps[1][Symbol.for('config')].props[key])
-                }
-            }
-            if (elms[1][scope.key].nodeId === undefined) {
-                elms[1][scope.key].populate(elementConfigs[1])
-                if (inSlot === true) {
-                    slotChildCounter -= 1
-                }
-            }
-            if (elms[2] === undefined) {
-                elms[2] = {}
-            }
-            parent = elms[1][scope.key];
-            props[2] = {}
-            if (elms[2][scope.key] === undefined) {
-                componentType = props[2]['is'] || 'ListItem'
-                components[2]
-                if (typeof componentType === 'string') {
-                    components[2] = context.components && context.components[componentType] || components[componentType]
-                    if (!components[2]) {
-                        throw new Error('Component "ListItem" not found')
-                    }
-                } else if (typeof componentType === 'function' && componentType[Symbol.for('isComponent')] === true) {
-                    components[2] = componentType
-                }
-                elms[2][scope.key] = components[2].call(null, { props: props[2] }, elms[1][scope.key], component)
-                if (elms[2][scope.key][Symbol.for('slots')][0]) {
-                    parent = elms[2][scope.key][Symbol.for('slots')][0]
-                    slotComponent = elms[2][scope.key]
-                    inSlot = true
-                } else {
-                    parent = elms[2][scope.key][Symbol.for('children')][0]
-                }
-            }
+
+        if (elms[1][scope.key].nodeId === undefined) {
+          elms[1][scope.key].populate(elementConfigs[1])
+
+          if (inSlot === true) {
+            slotChildCounter -= 1
+          }
         }
-        return effects
+
+        if (elms[2] === undefined) {
+          elms[2] = {}
+        }
+
+        parent = elms[1][scope.key];
+        props[2] = {}
+        if (elms[2][scope.key] === undefined) {
+          componentType = props[2]['is'] || 'ListItem'
+
+          components[2]
+          if (typeof componentType === 'string') {
+            components[2] =
+              context.components && context.components[componentType] || components[componentType]
+            if (!components[2]) {
+              throw new Error('Component "ListItem" not found')
+            }
+          } else if (
+            typeof componentType === 'function' &&
+            componentType[Symbol.for('isComponent')] === true
+          ) {
+            components[2] = componentType
+          }
+
+          elms[2][scope.key] = components[2].call(
+            null,
+            { props: props[2] },
+            elms[1][scope.key],
+            component
+          )
+
+          if (elms[2][scope.key][Symbol.for('slots')][0]) {
+            parent = elms[2][scope.key][Symbol.for('slots')][0]
+            slotComponent = elms[2][scope.key]
+            inSlot = true
+          } else {
+            parent = elms[2][scope.key][Symbol.for('children')][0]
+          }
+        }
+      }
+      return effects
     }
 
     let eff1 = () => {
-        forloops[1](component.items, elms, created[1])
+      forloops[1](component.items, elms, created[1])
     }
 
     component[Symbol.for('effects')].push(eff1)
@@ -4113,7 +4256,6 @@ test('Generate code for a template with a simple for-loop on a Component with a 
         components[2] = null
 
         eff1 = null
-
         // call loop with empty array
         forloops[1]([], elms, created[1])
         forloops[1] = null
@@ -4128,7 +4270,9 @@ test('Generate code for a template with a simple for-loop on a Component with a 
         skips.length = 0
       }
     }
-  }`
+  }
+
+`
 
   const actual = generator.call(scope, templateObject)
 
@@ -4180,81 +4324,111 @@ test('Generate code for a template with a simple for-loop on an Element with an 
     let slotChildCounter = 0
     let cmps = []
     elementConfigs[0] = {}
+
     elms[0] = this.element({ parent: parent || 'root' }, inSlot === true ? slotComponent : component)
+
     elms[0].populate(elementConfigs[0])
+
     if (inSlot === true) {
-        slotChildCounter -= 1
+      slotChildCounter -= 1
     }
 
     parent = elms[0]
+
     created[1] = []
     effects[1] = []
+
     let from1
     let to1
+
     forloops[1] = (collection = [], elms, created) => {
-        const rawCollection = getRaw(collection)
-        const keys = new Set()
-        let l = rawCollection.length
+      const rawCollection = getRaw(collection)
+      const keys = new Set()
+      let l = rawCollection.length
 
-        const range = {} || {}
-        from1 = range['from'] || 0
-        to1 = 'to' in range ? range['to'] : rawCollection.length
+      const range = {} || {}
+      from1 = range['from'] || 0
+      to1 = 'to' in range ? range['to'] : rawCollection.length
 
-        while (l--) {
-            const item = rawCollection[l]
-            if (l < to1 && l >= from1) {
-                keys.add('' + item.id)
-            }
+      while (l--) {
+        const item = rawCollection[l]
+
+        if (l < to1 && l >= from1) {
+          keys.add('' + item.id)
+        }
+      }
+
+      let i = created.length
+
+      while (i--) {
+        if (keys.has(created[i]) === false) {
+          const key = created[i]
+
+          elms[1][key] && elms[1][key].destroy()
+          elms[1][key] = null
+          delete elms[1][key]
+        }
+      }
+
+      created.length = 0
+      const length = rawCollection.length
+
+      component !== null && component[Symbol.for('removeGlobalEffects')](effects[1])
+
+      const effectsToRemove = new Set(effects[1].slice(0))
+      if (effectsToRemove.size > 0) {
+        const componentEffects = component?.[Symbol.for('effects')] || []
+        let writeIndex = 0
+        for (let readIndex = 0; readIndex < componentEffects.length; readIndex++) {
+          if (!effectsToRemove.has(componentEffects[readIndex])) {
+            componentEffects[writeIndex++] = componentEffects[readIndex]
+          }
+        }
+        componentEffects.length = writeIndex
+      }
+
+      effects[1].length = 0
+      for (let __index = 0; __index < length; __index++) {
+        if (__index < from1 || __index >= to1) continue
+        let scope = Object.create(component)
+        parent = elms[0]
+        scope['item'] = rawCollection[__index]
+
+        scope['undefined'] = __index
+
+        scope['key'] = '' + scope.item.id
+
+        scope['__ref'] = 'myref' + __index
+
+        created.push(scope.key)
+
+        parent = elms[0]
+
+        if (elms[1] === undefined) {
+          elms[1] = {}
         }
 
-        let i = created.length
-        while (i--) {
-            if (keys.has(created[i]) === false) {
-                const key = created[i]
-                elms[1][key] && elms[1][key].destroy()
-                elms[1][key] = null
-                delete elms[1][key]
-            }
+        elementConfigs[1] = {}
+        if (elms[1][scope.key] === undefined) {
+          elms[1][scope.key] = this.element(
+            { parent: parent || 'root' },
+            inSlot === true ? slotComponent : component
+          )
         }
-        created.length = 0
-        const length = rawCollection.length
-        component !== null && component[Symbol.for('removeGlobalEffects')](effects[1])
-        for(let i = 0; i < effects[1].length; i++) {
-          const value = effects[1][i]
-          const index = component[Symbol.for('effects')].indexOf(value)
-          if (index > -1) component[Symbol.for('effects')].splice(index, 1)
+        elementConfigs[1]['ref'] = scope.__ref
+        if (elms[1][scope.key].nodeId === undefined) {
+          elms[1][scope.key].populate(elementConfigs[1])
+
+          if (inSlot === true) {
+            slotChildCounter -= 1
+          }
         }
-        effects[1].length = 0
-        for (let __index = 0; __index < length; __index++) {
-            if (__index < from1 || __index >= to1) continue
-            let scope = Object.create(component)
-            parent = elms[0]
-            scope['item'] = rawCollection[__index]
-            scope['undefined'] = __index
-            scope['key'] = '' + scope.item.id
-            scope['__ref'] = 'myref' + __index
-            created.push(scope.key)
-            parent = elms[0]
-            if (elms[1] === undefined) {
-                elms[1] = {}
-            }
-            elementConfigs[1] = {}
-            if (elms[1][scope.key] === undefined) {
-                elms[1][scope.key] = this.element({ parent: parent || 'root' }, inSlot === true ? slotComponent : component)
-            }
-            elementConfigs[1]['ref'] = scope.__ref
-            if (elms[1][scope.key].nodeId === undefined) {
-                elms[1][scope.key].populate(elementConfigs[1])
-                if (inSlot === true) {
-                    slotChildCounter -= 1
-                }
-            }
-        }
-        return effects
+      }
+      return effects
     }
 
     let eff1 = () => {
-        forloops[1](component.items, elms, created[1])
+      forloops[1](component.items, elms, created[1])
     }
 
     component[Symbol.for('effects')].push(eff1)
@@ -4262,32 +4436,31 @@ test('Generate code for a template with a simple for-loop on an Element with an 
     effect(eff1, ['items',])
 
     return {
-        elms,
-        cleanup: () => {
-            rootComponent = null
-            propData = null
-            slotComponent = null
-            parent = null
+      elms,
+      cleanup: () => {
+        rootComponent = null
+        propData = null
+        slotComponent = null
+        parent = null
 
-            created[1].length = 0
+        created[1].length = 0
 
-            eff1 = null
+        eff1 = null
+        // call loop with empty array
+        forloops[1]([], elms, created[1])
+        forloops[1] = null
 
-            // call loop with empty array
-            forloops[1]([], elms, created[1])
-            forloops[1] = null
-
-            component = null
-            cmps.length = 0
-            elms.length = 0
-            components.length = 0
-            elementConfigs.length = 0
-            forloops.length = 0
-            props.length = 0
-            skips.length = 0
-        }
+        component = null
+        cmps.length = 0
+        elms.length = 0
+        components.length = 0
+        elementConfigs.length = 0
+        forloops.length = 0
+        props.length = 0
+        skips.length = 0
+      }
     }
-}
+  }
 
   `
 
