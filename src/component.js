@@ -229,6 +229,9 @@ const Component = (name = required('name'), config = required('config')) => {
     // create an empty array for storing intervals created by this component (via this.$setInterval)
     this[symbols.intervals] = []
 
+    // create a Map for storing debounced functions (via this.$debounce)
+    this[symbols.debounces] = new Map()
+
     // apply the state function (passing in the this reference to utilize configured props)
     // and store a reference to this original state
     this[symbols.originalState] =
@@ -361,7 +364,7 @@ const Component = (name = required('name'), config = required('config')) => {
           }
         }
 
-        let old = this[key]
+        let old = target[key]
 
         const eff = (force = false) => {
           const newValue = target[key]

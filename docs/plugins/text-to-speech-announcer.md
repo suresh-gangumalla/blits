@@ -49,7 +49,7 @@ Blits.Component('MyComponent', {
 
 ### Execute logic when done
 
-The `speak()`-function returns a promise that resolves when it's done speaking, or when it's interupted or errors out. The reason of the `speak()` method resolving is passed as an argument into the resolve function.
+The `speak()`-function returns a promise that resolves when it's done speaking, or when it's interrupted or errors out. The reason of the `speak()` method resolving is passed as an argument into the resolve function.
 
 ```js
 this.$announcer.speak('Hello').then((reason) => console.log('Speaking hello finished', reason))

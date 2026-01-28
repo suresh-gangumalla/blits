@@ -18,6 +18,9 @@
 import test from 'tape'
 import Focus from './focus.js'
 import symbols from './lib/symbols.js'
+import { initLog } from './lib/log.js'
+
+initLog()
 
 test('Focus type', (assert) => {
   const expected = 'object'

@@ -7,6 +7,8 @@ import timeouts_intervals from './timeouts_intervals.js'
 import { registerHooks } from '../../lib/hooks.js'
 import lifecycle from '../../lib/lifecycle.js'
 
+initLog()
+
 test('Methods - Should contain all the defined methods', (assert) => {
   const component = Object.defineProperties({}, { ...methods })
 
@@ -290,7 +292,7 @@ export const getTestComponent = () => {
       $componentId: 'TestComponent_1',
       ref: 'mainRef',
       [symbols.id]: 'TestComponent_1',
-      [symbols.state]: { hasFocus: false },
+      [symbols.state]: { $hasFocus: false },
       [symbols.state]: { prop1: 'value1', prop2: 'value2', prop3: [1, 2, 3] },
       [symbols.rendererEventListeners]: [],
       [symbols.children]: [
@@ -312,6 +314,7 @@ export const getTestComponent = () => {
       // not required by default but getting into error without this
       [symbols.timeouts]: [],
       [symbols.intervals]: [],
+      [symbols.debounces]: new Map(),
     },
     { ...methods, ...timeouts_intervals }
   )

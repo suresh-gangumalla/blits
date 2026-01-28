@@ -159,6 +159,7 @@ test('Generate render and effect code for a template with a single simple elemen
     let slotChildCounter = 0
     let cmps = []
     elementConfigs[0] = {}
+    elementConfigs[0]['___wrapper'] = true
     elms[0] = this.element({parent: parent || 'root'}, inSlot === true ? slotComponent : component)
     elms[0].populate(elementConfigs[0])
         if(inSlot === true) {
@@ -229,6 +230,7 @@ test('Generate code for a template with a simple element and a simple nested ele
     let slotChildCounter = 0
     let cmps = []
     elementConfigs[0] = {}
+    elementConfigs[0]['___wrapper'] = true
     elms[0] = this.element({ parent: parent || 'root' }, inSlot === true ? slotComponent : component)
     elms[0].populate(elementConfigs[0])
     if (inSlot === true) {
@@ -305,6 +307,7 @@ test('Generate code for a template with a single element with attributes', (asse
     let slotChildCounter = 0
     let cmps = []
     elementConfigs[0] = {}
+    elementConfigs[0]['___wrapper'] = true
     elms[0] = this.element({parent: parent || 'root'}, inSlot === true ? slotComponent : component)
 
     elementConfigs[0]['x'] = 10
@@ -376,6 +379,7 @@ test('Generate code for a template with a single element with attributes with a 
     let slotChildCounter = 0
     let cmps = []
     elementConfigs[0] = {}
+    elementConfigs[0]['___wrapper'] = true
     elms[0] = this.element({ parent: parent || 'root' }, inSlot === true ? slotComponent : component)
     elementConfigs[0]['one'] = true
     elementConfigs[0]['two'] = false
@@ -453,7 +457,7 @@ test('Generate code for a template with a single element with attributes with nu
     let slotChildCounter = 0
     let cmps = []
     elementConfigs[0] = {}
-
+    elementConfigs[0]['___wrapper'] = true
     elms[0] = this.element({ parent: parent || 'root' }, inSlot === true ? slotComponent : component)
 
     elementConfigs[0]['x'] = 1000
@@ -539,7 +543,7 @@ test('Generate code for a template with attributes and a nested element with att
     let slotChildCounter = 0
     let cmps = []
     elementConfigs[0] = {}
-
+    elementConfigs[0]['___wrapper'] = true
     elms[0] = this.element({ parent: parent || 'root' }, inSlot === true ? slotComponent : component)
     elementConfigs[0]['x'] = 10
     elementConfigs[0]['y'] = 20
@@ -637,7 +641,7 @@ test('Generate code for a template with attributes and 2 nested elements with at
     let slotChildCounter = 0
     let cmps = []
     elementConfigs[0] = {}
-
+    elementConfigs[0]['___wrapper'] = true
     elms[0] = this.element({ parent: parent || 'root' }, inSlot === true ? slotComponent : component)
     elementConfigs[0]['x'] = 10
     elementConfigs[0]['y'] = 20
@@ -759,7 +763,7 @@ test('Generate code for a template with attributes and deep nested elements with
     let slotChildCounter = 0
     let cmps = []
     elementConfigs[0] = {}
-
+    elementConfigs[0]['___wrapper'] = true
     elms[0] = this.element({ parent: parent || 'root' }, inSlot === true ? slotComponent : component)
     elementConfigs[0]['x'] = 10
     elementConfigs[0]['y'] = 20
@@ -882,7 +886,7 @@ test('Generate code for a template with simple dynamic attributes', (assert) => 
     let slotChildCounter = 0
     let cmps = []
     elementConfigs[0] = {}
-
+    elementConfigs[0]['___wrapper'] = true
     elms[0] = this.element({ parent: parent || 'root' }, inSlot === true ? slotComponent : component)
 
     elementConfigs[0]['x'] = 10
@@ -982,7 +986,7 @@ test('Generate code for a template with an attribute with a dash', (assert) => {
     let slotChildCounter = 0
     let cmps = []
     elementConfigs[0] = {}
-
+    elementConfigs[0]['___wrapper'] = true
     elms[0] = this.element({ parent: parent || 'root' }, inSlot === true ? slotComponent : component)
     elementConfigs[0]['my-Attribute'] = "does it work?"
     elementConfigs[0]['x'] = 10
@@ -1056,7 +1060,7 @@ test('Generate code for a template with dynamic attributes with code to be evalu
     let slotChildCounter = 0
     let cmps = []
     elementConfigs[0] = {}
-
+    elementConfigs[0]['___wrapper'] = true
     elms[0] = this.element({ parent: parent || 'root' }, inSlot === true ? slotComponent : component)
     elementConfigs[0]['attribute1'] = component.foo * 2
     elementConfigs[0]['attribute2'] = component.ok ? 'Yes' : 'No'
@@ -1163,7 +1167,7 @@ test('Generate code for a template with attribute (object)', (assert) => {
     let slotChildCounter = 0
     let cmps = []
     elementConfigs[0] = {}
-
+    elementConfigs[0]['___wrapper'] = true
     elms[0] = this.element({ parent: parent || 'root' }, inSlot === true ? slotComponent : component)
     elementConfigs[0]['w'] = 100
     elementConfigs[0]['h'] = 100
@@ -1236,7 +1240,7 @@ test('Generate code for a template with dynamic attribute (object)', (assert) =>
     let slotChildCounter = 0
     let cmps = []
     elementConfigs[0] = {}
-
+    elementConfigs[0]['___wrapper'] = true
     elms[0] = this.element({ parent: parent || 'root' }, inSlot === true ? slotComponent : component)
     elementConfigs[0]['w'] = 100
     elementConfigs[0]['h'] = 100
@@ -1310,7 +1314,7 @@ test('Generate code for a template with attribute (object) with mixed dynamic & 
     let slotChildCounter = 0
     let cmps = []
     elementConfigs[0] = {}
-
+    elementConfigs[0]['___wrapper'] = true
     elms[0] = this.element({ parent: parent || 'root' }, inSlot === true ? slotComponent : component)
     elementConfigs[0]['w'] = 100
     elementConfigs[0]['h'] = 100
@@ -1384,7 +1388,7 @@ test('Generate code for a template with @-listeners', (assert) => {
     let slotChildCounter = 0
     let cmps = []
     elementConfigs[0] = {}
-
+    elementConfigs[0]['___wrapper'] = true
     elms[0] = this.element({ parent: parent || 'root' }, inSlot === true ? slotComponent : component)
     elementConfigs[0]['src'] = "myImage.png"
     elementConfigs[0]['@loaded'] = component['loadedCallback'] && component['loadedCallback'].bind(component)
@@ -1469,6 +1473,7 @@ test('Generate code for a template with custom components', (assert) => {
     let cmps = []
 
     elementConfigs[0] = {}
+    elementConfigs[0]['___wrapper'] = true
     elms[0] = this.element({ parent: parent || 'root' }, inSlot === true ? slotComponent : component)
     elms[0].populate(elementConfigs[0])
     if (inSlot === true) {
@@ -1655,6 +1660,7 @@ test('Generate code for a template with an unregistered custom component', (asse
     let slotChildCounter = 0
     let cmps = []
     elementConfigs[0] = {}
+    elementConfigs[0]['___wrapper'] = true
     elms[0] = this.element({ parent: parent || 'root' }, inSlot === true ? slotComponent : component)
     elms[0].populate(elementConfigs[0])
     if (inSlot === true) {
@@ -1835,6 +1841,7 @@ test('Generate code for a template with custom components with arguments', (asse
     let slotChildCounter = 0
     let cmps = []
     elementConfigs[0] = {}
+    elementConfigs[0]['___wrapper'] = true
     elms[0] = this.element({parent: parent || 'root'}, inSlot === true ? slotComponent : component)
     elms[0].populate(elementConfigs[0])
     if(inSlot === true) {
@@ -2023,6 +2030,7 @@ test('Generate code for a template with custom components with argument value as
     let cmps = []
 
     elementConfigs[0] = {}
+    elementConfigs[0]['___wrapper'] = true
     elms[0] = this.element({parent: parent || 'root'}, inSlot === true ? slotComponent : component)
     elms[0].populate(elementConfigs[0])
     if(inSlot === true) {
@@ -2177,6 +2185,7 @@ test('Generate code for a template with custom components with reactive props', 
     let slotChildCounter = 0
     let cmps = []
     elementConfigs[0] = {}
+    elementConfigs[0]['___wrapper'] = true
     elms[0] = this.element({parent: parent || 'root'}, inSlot === true ? slotComponent : component)
     elms[0].populate(elementConfigs[0])
     if(inSlot === true) {
@@ -2410,7 +2419,7 @@ test('Generate code for a template with a transition attributes', (assert) => {
     let slotChildCounter = 0
     let cmps = []
     elementConfigs[0] = {}
-
+    elementConfigs[0]['___wrapper'] = true
     elms[0] = this.element({ parent: parent || 'root' }, inSlot === true ? slotComponent : component)
     elementConfigs[0]['x'] = { transition: component.myX }
     elementConfigs[0]['y'] = { transition: { value: component.myY, duration: 600 } }
@@ -2502,6 +2511,7 @@ test('Generate code for a template with slot content', (assert) => {
     let cmps = []
 
     elementConfigs[0] = {}
+    elementConfigs[0]['___wrapper'] = true
     elms[0] = this.element({ parent: parent || 'root' }, inSlot === true ? slotComponent : component)
     elms[0].populate(elementConfigs[0])
 
@@ -2689,6 +2699,7 @@ test('Generate code for a template with slot content, using a named slot', (asse
     let cmps = []
 
     elementConfigs[0] = {}
+    elementConfigs[0]['___wrapper'] = true
     elms[0] = this.element({ parent: parent || 'root' }, inSlot === true ? slotComponent : component)
     elms[0].populate(elementConfigs[0])
 
@@ -2860,7 +2871,7 @@ test('Generate code for a template with a slot', (assert) => {
     let slotChildCounter = 0
     let cmps = []
     elementConfigs[0] = {}
-
+    elementConfigs[0]['___wrapper'] = true
     elms[0] = this.element({ parent: parent || 'root' }, inSlot === true ? slotComponent : component)
     elms[0].populate(elementConfigs[0])
 
@@ -2957,7 +2968,7 @@ test('Generate code for a template with inline Text', (assert) => {
     let slotChildCounter = 0
     let cmps = []
     elementConfigs[0] = {}
-
+    elementConfigs[0]['___wrapper'] = true
     elms[0] = this.element({ parent: parent || 'root' }, inSlot === true ? slotComponent : component)
     elms[0].populate(elementConfigs[0])
 
@@ -3042,7 +3053,7 @@ test('Generate code for a template with inline dynamic Text', (assert) => {
     let slotChildCounter = 0
     let cmps = []
     elementConfigs[0] = {}
-
+    elementConfigs[0]['___wrapper'] = true
     elms[0] = this.element({ parent: parent || 'root' }, inSlot === true ? slotComponent : component)
     elms[0].populate(elementConfigs[0])
 
@@ -3127,7 +3138,7 @@ test('Generate code for a template with inline dynamic Text embedded in static t
     let slotChildCounter = 0
     let cmps = []
     elementConfigs[0] = {}
-
+    elementConfigs[0]['___wrapper'] = true
     elms[0] = this.element({ parent: parent || 'root' }, inSlot === true ? slotComponent : component)
     elms[0].populate(elementConfigs[0])
     if (inSlot === true) {
@@ -3215,6 +3226,7 @@ test('Generate code for a template with inline text interpolation from plugins v
     let cmps = []
 
     elementConfigs[0] = {}
+    elementConfigs[0]['___wrapper'] = true
     elms[0] = this.element({parent: parent || 'root'}, inSlot === true ? slotComponent : component)
     elms[0].populate(elementConfigs[0])
     if(inSlot === true) {
@@ -3298,7 +3310,7 @@ test('Generate code for a template with a single element with attributes with pe
     let slotChildCounter = 0
     let cmps = []
     elementConfigs[0] = {}
-
+    elementConfigs[0]['___wrapper'] = true
     elms[0] = this.element({ parent: parent || 'root' }, inSlot === true ? slotComponent : component)
     elementConfigs[0]['w'] = 1920
     elementConfigs[0]['h'] = 1080
@@ -3386,6 +3398,7 @@ test('Generate code for a template with a simple for-loop on an Element', (asser
     let slotChildCounter = 0
     let cmps = []
     elementConfigs[0] = {}
+    elementConfigs[0]['___wrapper'] = true
     elms[0] = this.element({ parent: parent || 'root' }, inSlot === true ? slotComponent : component)
     elms[0].populate(elementConfigs[0])
     if (inSlot === true) {
@@ -3542,6 +3555,7 @@ test('Generate code for a template with a simple for-loop on an Element, Using d
     let slotChildCounter = 0
     let cmps = []
     elementConfigs[0] = {}
+    elementConfigs[0]['___wrapper'] = true
     elms[0] = this.element({ parent: parent || 'root' }, inSlot === true ? slotComponent : component)
     elms[0].populate(elementConfigs[0])
     if (inSlot === true) {
@@ -3696,6 +3710,7 @@ test('Generate code for a template with a simple for-loop on an Element, Using d
     let slotChildCounter = 0
     let cmps = []
     elementConfigs[0] = {}
+    elementConfigs[0]['___wrapper'] = true
     elms[0] = this.element({ parent: parent || 'root' }, inSlot === true ? slotComponent : component)
     elms[0].populate(elementConfigs[0])
     if (inSlot === true) {
@@ -3850,6 +3865,7 @@ test('Generate code for a template with a simple for-loop on an Element with a c
     let slotChildCounter = 0
     let cmps = []
     elementConfigs[0] = {}
+    elementConfigs[0]['___wrapper'] = true
     elms[0] = this.element({ parent: parent || 'root' }, inSlot === true ? slotComponent : component)
     elms[0].populate(elementConfigs[0])
     if (inSlot === true) {
@@ -4005,6 +4021,7 @@ test('Generate code for a template with a simple for-loop on an Element with a k
     let slotChildCounter = 0
     let cmps = []
     elementConfigs[0] = {}
+    elementConfigs[0]['___wrapper'] = true
     elms[0] = this.element({ parent: parent || 'root' }, inSlot === true ? slotComponent : component)
     elms[0].populate(elementConfigs[0])
     if (inSlot === true) {
@@ -4160,6 +4177,7 @@ test('Generate code for a template with a simple for-loop on a Component with a 
   let cmps = []
 
   elementConfigs[0] = {}
+  elementConfigs[0]['___wrapper'] = true
   elms[0] = this.element({ parent: parent || 'root' }, inSlot === true ? slotComponent : component)
   elms[0].populate(elementConfigs[0])
   if (inSlot === true) {
@@ -4375,6 +4393,7 @@ test('Generate code for a template with a simple for-loop on an Element with an 
     let slotChildCounter = 0
     let cmps = []
     elementConfigs[0] = {}
+    elementConfigs[0]['___wrapper'] = true
     elms[0] = this.element({ parent: parent || 'root' }, inSlot === true ? slotComponent : component)
     elms[0].populate(elementConfigs[0])
     if (inSlot === true) {
@@ -4530,7 +4549,7 @@ test('Generate code for a template with double $$ (i.e. referencing a Blits plug
     let slotChildCounter = 0
     let cmps = []
     elementConfigs[0] = {}
-
+    elementConfigs[0]['___wrapper'] = true
     elms[0] = this.element({ parent: parent || 'root' }, inSlot === true ? slotComponent : component)
     elementConfigs[0]['content'] = component.$language.translate('hello')
     elementConfigs[0]['__textnode'] = true
@@ -4633,7 +4652,7 @@ test('Generate code for a template with verification of dynamic attributes', (as
     }
 
     elementConfigs[0] = {}
-
+    elementConfigs[0]['___wrapper'] = true
     elms[0] = this.element({ parent: parent || 'root' }, inSlot === true ? slotComponent : component)
 
     propInComponent('eWidth', 'dynamic')
@@ -4728,7 +4747,7 @@ test('Generate code for a template with verification of reactive attributes', (a
     }
 
     elementConfigs[0] = {}
-
+    elementConfigs[0]['___wrapper'] = true
     elms[0] = this.element({ parent: parent || 'root' }, inSlot === true ? slotComponent : component)
 
     propInComponent('eWidth', 'reactive')
@@ -4851,7 +4870,7 @@ test('Generate code for a template with attribute values verified against a nest
     }
 
     elementConfigs[0] = {}
-
+    elementConfigs[0]['___wrapper'] = true
     elms[0] = this.element({ parent: parent || 'root' }, inSlot === true ? slotComponent : component)
 
     propInComponent('position.x', 'dynamic')
@@ -4978,7 +4997,7 @@ test('Generate code for a template with verification of attributes with Math cal
     }
 
     elementConfigs[0] = {}
-
+    elementConfigs[0]['___wrapper'] = true
     elms[0] = this.element({ parent: parent || 'root' }, inSlot === true ? slotComponent : component)
 
     propInComponent('position.x', 'dynamic')
