@@ -868,7 +868,7 @@ export default (config, component) => {
     inspectorEnabled = Settings.get('inspector', false)
   }
   if (animateDebounceDelay === null) {
-    animateDebounceDelay = Settings.get('animateDebounceDelay', 50)
+    animateDebounceDelay = Settings.get('animateDebounceDelay', 0)
   }
   return Object.assign(Object.create(Element), {
     props: Object.assign(Object.create(propsTransformer), { props: {} }),
