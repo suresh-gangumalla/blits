@@ -403,8 +403,7 @@ export const navigate = async function () {
       // Update router state after announcements and final route resolution,
       // right before initializing or restoring the view
       state.path = route.path
-      const nextParams = route.params || {}
-      state.params = Object.keys(nextParams).length === 0 ? null : nextParams
+      state.params = Object.keys(route.params).length === 0 ? null : route.params
       state.hash = route.hash
       state.data = null
       state.data = route.data || {}
