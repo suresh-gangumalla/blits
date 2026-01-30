@@ -229,6 +229,12 @@ let textDefaults = null
 let inspectorEnabled = null
 
 /**
+ * Debounce delay for animate function (initialized on first use).
+ * @type {number|null}
+ */
+let animateDebounceDelay = null
+
+/**
  * @typedef {import('../../component.js').BlitsElement} BlitsElement
  *
  * This is always a BlitsElement
@@ -656,13 +662,35 @@ const Element = {
     }
   },
   animate(prop, value, transition) {
+    // Clear any existing debounce timeout for this property
+    if (this.debounceTimeouts[prop] !== undefined) {
+      clearTimeout(this.debounceTimeouts[prop])
+      Log.debug(`Cleared debounce timeout for property "${prop}"`)
+    }
+
+    // Debounce the animation execution
+    this.debounceTimeouts[prop] = setTimeout(() => {
+      delete this.debounceTimeouts[prop]
+      this._executeAnimation(prop, value, transition)
+    }, animateDebounceDelay)
+
+    Log.debug(
+      `Debounced animation for property "${prop}" - will execute in ${animateDebounceDelay}ms`
+    )
+  },
+  _executeAnimation(prop, value, transition) {
     // check if a transition is already scheduled to run on the same prop
     // and cancels it if it does
+    const stateOfAnimation =
+      this.scheduledTransitions[prop] !== undefined
+        ? this.scheduledTransitions[prop].f.state
+        : undefined
+
     if (
-      this.scheduledTransitions[prop] !== undefined &&
-      this.scheduledTransitions[prop].f.state === 'scheduled'
+      stateOfAnimation !== undefined &&
+      (stateOfAnimation === 'scheduled' || stateOfAnimation === 'running')
     ) {
-      this.scheduledTransitions[prop].f.stop()
+      this.scheduledTransitions[prop].f.stop(stateOfAnimation === 'running' ? false : true)
     }
 
     // if current value is the same as the value to animate to, instantly resolve
@@ -752,6 +780,14 @@ const Element = {
     if (this.node === null) return
 
     Log.debug('Deleting Node', this.nodeId)
+
+    // Clear all pending debounce timeouts
+    const debounceProps = Object.keys(this.debounceTimeouts)
+    for (let i = 0; i < debounceProps.length; i++) {
+      clearTimeout(this.debounceTimeouts[debounceProps[i]])
+    }
+    this.debounceTimeouts = {}
+
     // Clearing transition end callback functions
     const transitionProps = Object.keys(this.scheduledTransitions)
     for (let i = 0; i < transitionProps.length; i++) {
@@ -831,9 +867,13 @@ export default (config, component) => {
   if (inspectorEnabled === null) {
     inspectorEnabled = Settings.get('inspector', false)
   }
+  if (animateDebounceDelay === null) {
+    animateDebounceDelay = Settings.get('animateDebounceDelay', 50)
+  }
   return Object.assign(Object.create(Element), {
     props: Object.assign(Object.create(propsTransformer), { props: {} }),
     scheduledTransitions: {},
+    debounceTimeouts: {},
     config,
     component,
   })

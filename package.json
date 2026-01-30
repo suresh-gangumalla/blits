@@ -74,7 +74,7 @@
   },
   "dependencies": {
     "@lightningjs/msdf-generator": "^1.2.0",
-    "@lightningjs/renderer": "^2.20.4",
+    "@lightningjs/renderer": "file:../../renderer-2.x/renderer",
     "magic-string": "^0.30.21"
   },
   "repository": {
