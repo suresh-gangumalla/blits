@@ -229,12 +229,6 @@ let textDefaults = null
 let inspectorEnabled = null
 
 /**
- * Debounce delay for animate function (initialized on first use).
- * @type {number|null}
- */
-let animateDebounceDelay = null
-
-/**
  * @typedef {import('../../component.js').BlitsElement} BlitsElement
  *
  * This is always a BlitsElement
@@ -672,11 +666,7 @@ const Element = {
     this.debounceTimeouts[prop] = setTimeout(() => {
       delete this.debounceTimeouts[prop]
       this._executeAnimation(prop, value, transition)
-    }, animateDebounceDelay)
-
-    Log.debug(
-      `Debounced animation for property "${prop}" - will execute in ${animateDebounceDelay}ms`
-    )
+    }, 0)
   },
   _executeAnimation(prop, value, transition) {
     // check if a transition is already scheduled to run on the same prop
@@ -786,7 +776,7 @@ const Element = {
     for (let i = 0; i < debounceProps.length; i++) {
       clearTimeout(this.debounceTimeouts[debounceProps[i]])
     }
-    this.debounceTimeouts = {}
+    this.debounceTimeouts = null
 
     // Clearing transition end callback functions
     const transitionProps = Object.keys(this.scheduledTransitions)
@@ -866,9 +856,6 @@ export default (config, component) => {
   }
   if (inspectorEnabled === null) {
     inspectorEnabled = Settings.get('inspector', false)
-  }
-  if (animateDebounceDelay === null) {
-    animateDebounceDelay = Settings.get('animateDebounceDelay', 0)
   }
   return Object.assign(Object.create(Element), {
     props: Object.assign(Object.create(propsTransformer), { props: {} }),
