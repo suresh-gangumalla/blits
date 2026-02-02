@@ -156,7 +156,9 @@ export default {
       if (key === 'type') {
         continue
       }
-      v[key] = this.parseProp(v[key])
+      if (key === 'color') {
+        v[key] = this.parseProp(v[key])
+      }
     }
     return v
   },
