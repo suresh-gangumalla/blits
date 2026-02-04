@@ -17,7 +17,6 @@
 
 import test from 'tape'
 import { initLog } from '../lib/log.js'
-import Focus from '../focus.js'
 import { matchHash, getHash, to, navigate, back, state } from './router.js'
 import { stage } from '../launch.js'
 import Component from '../component.js'
@@ -612,8 +611,6 @@ test('Router updates state.path, state.params, and state.data correctly', async 
 
 test('Router.back() pops history and navigates to previous route', async (assert) => {
   const originalElement = stage.element
-  const originalFocusSet = Focus.set
-  Focus.set = () => {}
 
   stage.element = ({ parent }) => ({
     populate() {},
@@ -659,15 +656,12 @@ test('Router.back() pops history and navigates to previous route', async (assert
   assert.equal(back.call(host), true, 'back() should return true when history has previous route')
   assert.ok(window.location.hash.includes('first'), 'Should set hash to previous route')
 
-  Focus.set = originalFocusSet
   stage.element = originalElement
   assert.end()
 })
 
 test('Transition out with end callback is invoked on navigate away', async (assert) => {
   const originalElement = stage.element
-  const originalFocusSet = Focus.set
-  Focus.set = () => {}
 
   let endCalled = false
   stage.element = ({ parent }) => ({
@@ -717,7 +711,6 @@ test('Transition out with end callback is invoked on navigate away', async (asse
   await navigate.call(host)
 
   assert.ok(endCalled, 'Should call transition.out.end when navigating away')
-  Focus.set = originalFocusSet
   stage.element = originalElement
   assert.end()
 })
