@@ -810,8 +810,13 @@ const cast = (val = '', key = false, component = 'component.') => {
   }
   // @-listener
   else if (key.startsWith('@') && val) {
-    const c = component.slice(0, -1)
-    castedValue = `${c}['${val.replace('$', '')}'] && ${c}['${val.replace('$', '')}'].bind(${c})`
+    const trimmed = val.trim()
+    if (/^\$?\w+$/.test(trimmed)) {
+      const c = component.slice(0, -1)
+      castedValue = `${c}['${trimmed.replace('$', '')}'] && ${c}['${trimmed.replace('$', '')}'].bind(${c})`
+    } else {
+      castedValue = interpolate(trimmed, component)
+    }
   }
   // dynamic value
   else if (val.startsWith('$')) {

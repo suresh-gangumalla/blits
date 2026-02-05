@@ -1426,6 +1426,63 @@ test('Generate code for a template with @-listeners', (assert) => {
   assert.end()
 })
 
+test('Generate code for @-listener: method refs and function expressions', (assert) => {
+  const scope = { element: () => ({ populate: () => {} }) }
+
+  const methodRefTemplate = {
+    children: [{ [Symbol.for('componentType')]: 'Element', '@loaded': '$onLoad' }],
+  }
+  const methodRefCode = generator.call(scope, methodRefTemplate).render.toString()
+  assert.ok(
+    methodRefCode.includes(
+      "elementConfigs[0]['@loaded'] = component['onLoad'] && component['onLoad'].bind(component)"
+    ),
+    'method ref uses bind(component)'
+  )
+  assert.notOk(methodRefCode.includes('interpolate'), 'method ref does not use interpolate path')
+
+  const arrowTemplate = {
+    children: [{ [Symbol.for('componentType')]: 'Element', '@loaded': '() => $textLoaded()' }],
+  }
+  const arrowCode = generator.call(scope, arrowTemplate).render.toString()
+  assert.ok(
+    arrowCode.includes("elementConfigs[0]['@loaded'] = () => component.textLoaded()"),
+    'arrow expression is interpolated'
+  )
+
+  const fnTemplate = {
+    children: [
+      {
+        [Symbol.for('componentType')]: 'Element',
+        '@loaded': 'function() { $onLoaded(); }',
+      },
+    ],
+  }
+  const fnCode = generator.call(scope, fnTemplate).render.toString()
+  assert.ok(
+    fnCode.includes("elementConfigs[0]['@loaded'] = function() { component.onLoaded(); }"),
+    'regular function expression is interpolated'
+  )
+
+  const argsTemplate = {
+    children: [
+      {
+        [Symbol.for('componentType')]: 'Element',
+        '@loaded': '(dimensions) => $loadedText(dimensions, $index)',
+      },
+    ],
+  }
+  const argsCode = generator.call(scope, argsTemplate).render.toString()
+  assert.ok(
+    argsCode.includes(
+      "elementConfigs[0]['@loaded'] = (dimensions) => component.loadedText(dimensions, component.index)"
+    ),
+    'arrow with params and multiple $ refs is interpolated'
+  )
+
+  assert.end()
+})
+
 test('Generate code for a template with custom components', (assert) => {
   const templateObject = {
     children: [
