@@ -360,17 +360,17 @@ const generateComponentCode = function (
     }
   `)
 
-  // For forloops, this code runs per instance, setting metadata for each component instance
   if (isDev === true) {
-    const componentType = templateObject[Symbol.for('componentType')]
+    const templateTagName = templateObject[Symbol.for('componentType')]
     const holderElm = options.key
       ? `elms[${holderCounter}][${options.key}]`
       : `elms[${holderCounter}]`
+    const componentDisplayName = `typeof componentType === 'string'
+      ? componentType
+      : (componentType?.[Symbol.for('componentType')] || '${templateTagName}')`
     renderCode.push(`
       if (${holderElm} !== undefined && typeof ${holderElm}.setInspectorMetadata === 'function') {
-        ${holderElm}.setInspectorMetadata({
-          $componentType: '${componentType}'
-        })
+        ${holderElm}.setInspectorMetadata({ $componentType: ${componentDisplayName} })
       }
     `)
   }
