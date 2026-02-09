@@ -602,7 +602,7 @@ const Element = {
       this.props.props['data'] = {}
     }
 
-    // Merge framework data (with $ prefix to prevent collisions)
+    // Merge framework data (blits-* keys data attributes)
     Object.assign(this.props['data'], data)
     Object.assign(this.props.props['data'], data)
 
@@ -718,7 +718,7 @@ const Element = {
 
     // Update inspector metadata when transition starts
     if (inspectorEnabled === true) {
-      this.setInspectorMetadata({ $isTransitioning: true })
+      this.setInspectorMetadata({ 'blits-isTransitioning': true })
     }
 
     if (transition.start !== undefined && typeof transition.start === 'function') {
@@ -758,7 +758,7 @@ const Element = {
       // Update inspector metadata when transition ends
       if (inspectorEnabled === true) {
         this.setInspectorMetadata({
-          $isTransitioning: Object.keys(this.scheduledTransitions).length > 0,
+          'blits-isTransitioning': Object.keys(this.scheduledTransitions).length > 0,
         })
       }
     })

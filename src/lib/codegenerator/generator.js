@@ -370,7 +370,7 @@ const generateComponentCode = function (
       : (componentType?.[Symbol.for('componentType')] || '${templateTagName}')`
     renderCode.push(`
       if (${holderElm} !== undefined && typeof ${holderElm}.setInspectorMetadata === 'function') {
-        ${holderElm}.setInspectorMetadata({ $componentType: ${componentDisplayName} })
+        ${holderElm}.setInspectorMetadata({ 'blits-componentType': ${componentDisplayName} })
       }
     `)
   }
