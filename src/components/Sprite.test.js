@@ -14,12 +14,9 @@ Object.assign(renderer, engineRenderer)
 engineRenderer.createNode = () => new EventEmitter()
 
 function createSprite() {
-  const mockHolder = {
-    set: () => {},
-    props: { raw: {} },
-    node: { w: 1920, h: 1080 },
-  }
-  return Sprite()({}, mockHolder)
+  const holder = element({ parent: { node: { width: 1920, height: 1080 } } }, {})
+  holder.populate({})
+  return Sprite()({}, holder)
 }
 
 test('Sprite - Type', (assert) => {
