@@ -20,9 +20,9 @@ import Component from '../component.js'
 export default () =>
   Component('Circle', {
     template: `
-      <Element :color="$color" :w="$size" :h="$size" :rounded="$radius"></Element>
+      <Element :color="$bgColor" :w="$size" :h="$size" :rounded="$radius"></Element>
     `,
-    props: { size: 40, color: 'white' },
+    props: { size: 40, bgColor: 'white' },
     computed: {
       radius() {
         return this.size / 2
