@@ -5,6 +5,7 @@ on:
     branches:
       - dev
       - master
+      - v2/update
 
 jobs:
   run-blits-tests:
