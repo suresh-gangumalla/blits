@@ -76,26 +76,7 @@ const Application = (config) => {
     const mouseEnabled = Settings.get('enableMouse', false)
 
     keyDownHandler = async (e) => {
-      const currentTime = performance.now()
-
       const key = keyMap[e.key] || keyMap[e.keyCode] || e.key || e.keyCode
-      const sameKey = lastInputKey === key
-      lastInputKey = key
-      // execute immediately when no throttle is specified or event is internal (bubbled up by focus manager)
-      // or key is different from the last used key
-      if (throttleMs === 0 || e[symbols.internalEvent] === true || sameKey === false) {
-        return await processInput.call(this, e, key)
-      }
-
-      if (currentTime - lastInputTime < throttleMs) {
-        return
-      }
-
-      lastInputTime = currentTime
-      await processInput.call(this, e, key)
-    }
-
-    const processInput = async function (e, key) {
       // intercept key press if specified in main Application component
       if (
         this[symbols.inputEvents] !== undefined &&
